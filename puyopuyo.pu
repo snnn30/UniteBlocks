@@ -1,0 +1,41 @@
+@startuml hoge
+class BoardController{
+    +bool CanSettle(Vector2Int pos) 
+    +bool Settle(Vector2Int pos, PuyoType puyoType)
+}
+class PuyoController{
+    +PuyoType : PuyoType
+    +void SetPos(Vector2 pos)
+}
+class PuyoCollerTable{
+    +SerializableDictionary<PuyoType, Color> PuyoColooers
+}
+class SerializableDictionary
+enum PuyoType
+
+class PlayerRotate
+class PlayerMove
+class PlayerState{
+    +Vector2Int Position
+    +RotState Rotation
+    +bool SetPosition(Vector2Int targetPos)
+    +bool SetRotation(RotState targetRot)
+}
+enum RotState
+
+BoardController --> PuyoController
+BoardController ..> PuyoType
+PuyoController --> PuyoCollerTable
+PuyoController --> PuyoType
+PuyoCollerTable --> SerializableDictionary
+PuyoCollerTable --> PuyoType
+
+PlayerRotate --> PlayerState
+PlayerRotate ..> RotState
+PlayerMove --> PlayerState
+PlayerState --> PuyoController
+PlayerState --> BoardController
+PlayerState --> RotState
+
+
+@enduml
