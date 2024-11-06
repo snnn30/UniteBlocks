@@ -11,10 +11,13 @@ using UnityEngine.InputSystem;
 public class PlayerMove : MonoBehaviour
 {
     [SerializeField] float _moveDelay = 0.12f;
+    [SerializeField] float _autoDropDelay = 0.36f;
+    [SerializeField] float _manualDropDelay = 0.24f;
 
+    float _dropDelay;
     PlayerInput _input;
     PlayerState _state;
-    CancellationTokenSource _cancellationTokenSource;
+    CancellationTokenSource _moveCTS;
 
 
     Vector2Int CalcMovePos(float direction)
@@ -28,8 +31,6 @@ public class PlayerMove : MonoBehaviour
         return _state.SetPosition(CalcMovePos(direction));
     }
 
-
-
     void OnMoveStarted(InputAction.CallbackContext context)
     {
         Move(context.ReadValue<float>());
@@ -37,8 +38,8 @@ public class PlayerMove : MonoBehaviour
 
     void OnMovePerformed(InputAction.CallbackContext context)
     {
-        _cancellationTokenSource = new CancellationTokenSource();
-        MoveContinuous(_cancellationTokenSource.Token).Forget();
+        _moveCTS = new CancellationTokenSource();
+        MoveContinuous(_moveCTS.Token).Forget();
         async UniTask MoveContinuous(CancellationToken token)
         {
             while (true)
@@ -51,20 +52,54 @@ public class PlayerMove : MonoBehaviour
 
     void OnMoveCanceled(InputAction.CallbackContext context)
     {
-        if (_cancellationTokenSource != null)
+        if (_moveCTS != null)
         {
-            _cancellationTokenSource.Cancel();
+            _moveCTS.Cancel();
+            _moveCTS.Dispose();
+            _moveCTS = null;
         }
 
     }
 
 
+    bool Drop()
+    {
+        return _state.SetPosition(_state.Position + Vector2Int.down);
+    }
+
+    void StartAutoDrop()
+    {
+        _dropDelay = _autoDropDelay;
+        CancellationToken token = this.GetCancellationTokenOnDestroy();
+        DropContinuous(token).Forget();
+        async UniTask DropContinuous(CancellationToken token)
+        {
+            while (true)
+            {
+                Drop();
+                await UniTask.Delay(TimeSpan.FromSeconds(_dropDelay), cancellationToken: token);
+            }
+        }
+    }
+
+    void OnDropPerformed(InputAction.CallbackContext context)
+    {
+        _dropDelay = _manualDropDelay;
+    }
+
+    void OnDropCanceled(InputAction.CallbackContext context)
+    {
+        _dropDelay = _autoDropDelay;
+    }
+
 
     private void OnDestroy()
     {
-        if (_cancellationTokenSource != null)
+        if (_moveCTS != null)
         {
-            _cancellationTokenSource.Cancel();
+            _moveCTS.Cancel();
+            _moveCTS.Dispose();
+            _moveCTS = null;
         }
     }
 
@@ -72,6 +107,7 @@ public class PlayerMove : MonoBehaviour
     {
         _input = GetComponent<PlayerInput>();
         _state = GetComponent<PlayerState>();
+        StartAutoDrop();
     }
 
     private void OnEnable()
@@ -79,6 +115,9 @@ public class PlayerMove : MonoBehaviour
         _input.actions["Move"].started += OnMoveStarted;
         _input.actions["Move"].performed += OnMovePerformed;
         _input.actions["Move"].canceled += OnMoveCanceled;
+
+        _input.actions["Drop"].performed += OnDropPerformed;
+        _input.actions["Drop"].canceled += OnDropCanceled;
     }
 
     private void OnDisable()
@@ -86,5 +125,8 @@ public class PlayerMove : MonoBehaviour
         _input.actions["Move"].started -= OnMoveStarted;
         _input.actions["Move"].performed -= OnMovePerformed;
         _input.actions["Move"].canceled -= OnMoveCanceled;
+
+        _input.actions["Drop"].performed -= OnDropPerformed;
+        _input.actions["Drop"].canceled -= OnDropCanceled;
     }
 }
