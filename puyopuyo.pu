@@ -19,6 +19,9 @@ class PlayerState{
     +bool SetRotation(bool isRight, float duration)
 }
 enum Direction
+class WatingPuyos{
+    +PuyoController[2] GetNextPuyos()
+}
 
 BoardController --> PuyoController
 BoardController ..> PuyoType
@@ -33,6 +36,8 @@ PlayerMove ..> Direction
 PlayerState --> PuyoController
 PlayerState --> BoardController
 PlayerState *- Direction
+PlayerState *-- WatingPuyos
+WatingPuyos --> Pyoco
 
 
 @enduml
