@@ -103,6 +103,10 @@ public class PlayerMove : MonoBehaviour
     {
         _input = GetComponent<PlayerInput>();
         _state = GetComponent<PlayerState>();
+    }
+
+    private void Start()
+    {
         StartAutoDrop();
     }
 

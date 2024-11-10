@@ -8,8 +8,9 @@ using UnityEngine;
 
 public class PlayerState : MonoBehaviour
 {
-    [SerializeField] PuyoController[] _puyoControllers = new PuyoController[2];
+    PuyoController[] _puyoControllers = new PuyoController[2];
     [SerializeField] BoardController _boardController;
+    [SerializeField] WaitingPuyos _waitingPuyos;
 
     public enum Direction
     {
@@ -94,18 +95,29 @@ public class PlayerState : MonoBehaviour
         return pos + directionVec[rot];
     }
 
-    private void Awake()
+    void ChangeOperationPuyos()
     {
         Rotation = Direction.Up;
         Position = new Vector2Int(2, 12);
         this.transform.localPosition = new Vector3(Position.x, Position.y, 0);
-        var childPos = CalcChildPuyoPos(Position, Rotation);
-        _puyoControllers[1].transform.localPosition = new Vector3(0, 1, 0);
+
+        _puyoControllers = _waitingPuyos.GetNextPuyos();
+        _puyoControllers[0].transform.position = this.transform.position;
+        _puyoControllers[1].transform.position = this.transform.position + Vector3.up;
+        _puyoControllers[0].transform.parent = this.transform;
+        _puyoControllers[1].transform.parent = this.transform;
+    }
+
+    private void Awake()
+    {
+        foreach (Transform n in this.transform)
+        {
+            GameObject.Destroy(n.gameObject);
+        }
     }
 
     private void Start()
     {
-        _puyoControllers[0].PuyoType = PuyoType.Green;
-        _puyoControllers[1].PuyoType = PuyoType.Red;
+        ChangeOperationPuyos();
     }
 }

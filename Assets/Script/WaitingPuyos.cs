@@ -6,10 +6,10 @@ using UnityEngine;
 
 public class WaitingPuyos : MonoBehaviour
 {
-    [SerializeField] PuyoController[] _puyoControllers = new PuyoController[2];
+    PuyoController[] _puyoControllers = new PuyoController[2];
     [SerializeField] PuyoController _prefabPuyo;
 
-    PuyoController[] GetNextPuyos()
+    public PuyoController[] GetNextPuyos()
     {
         PuyoController[] returnPuyos = _puyoControllers;
         _puyoControllers = GeneratePuyos();
@@ -22,7 +22,7 @@ public class WaitingPuyos : MonoBehaviour
 
         returnPuyos[0] = Instantiate(_prefabPuyo, transform);
         returnPuyos[1] = Instantiate(_prefabPuyo, transform);
-        returnPuyos[1].transform.SetPositionAndRotation(transform.position + Vector3.down, Quaternion.identity);
+        returnPuyos[1].transform.SetPositionAndRotation(transform.position + Vector3.up, Quaternion.identity);
 
         int len = System.Enum.GetValues(typeof(PuyoType)).Length;
         returnPuyos[0].PuyoType = (PuyoType)Random.Range(1, len);
