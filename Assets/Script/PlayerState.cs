@@ -24,14 +24,19 @@ public class PlayerState : MonoBehaviour
         [RotState.Right] = Vector2Int.right,
     };
 
-    public Vector2Int Position { get; private set; }
+    Vector2Int Position { get; set; }
     RotState Rotation { get; set; }
 
 
-    public bool SetPosition(Vector2Int targetPos, float duration)
+    public bool SetPosition(Vector2Int direction, float duration)
     {
+        if (!(direction.x == 0 ^ direction.y == 0)) return false;
+
+        var targetPos = Position + direction;
+
         if (!CanSet(targetPos, Rotation)) { return false; }
-        Vector3 relativeParentVec = new Vector3(targetPos.x - Position.x, targetPos.y - Position.y, 0);
+
+        Vector3 relativeParentVec = new Vector3(direction.x, direction.y, 0);
 
         this.transform.DOBlendableLocalMoveBy(relativeParentVec, duration);
 

@@ -20,15 +20,10 @@ public class PlayerMove : MonoBehaviour
     CancellationTokenSource _moveCTS;
 
 
-    Vector2Int CalcMovePos(float direction)
-    {
-        var normalizedDir = (direction < 0) ? Vector2Int.left : Vector2Int.right;
-        return _state.Position + normalizedDir;
-    }
-
     bool Move(float direction, float duration)
     {
-        return _state.SetPosition(CalcMovePos(direction), duration);
+        Vector2Int dirVec = (direction < 0) ? Vector2Int.left : Vector2Int.right;
+        return _state.SetPosition(dirVec, duration);
     }
 
     void OnMoveStarted(InputAction.CallbackContext context)
@@ -64,7 +59,7 @@ public class PlayerMove : MonoBehaviour
 
     bool Drop()
     {
-        return _state.SetPosition(_state.Position + Vector2Int.down, _dropDelay);
+        return _state.SetPosition(Vector2Int.down, _dropDelay);
     }
 
     void StartAutoDrop()

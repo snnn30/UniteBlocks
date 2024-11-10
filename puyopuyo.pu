@@ -15,8 +15,7 @@ enum PuyoType
 class PlayerRotate
 class PlayerMove
 class PlayerState{
-    +Vector2Int Position
-    +bool SetPosition(Vector2Int targetPos, float duration)
+    +bool SetPosition(Vector2Int direction, float duration)
     +bool SetRotation(bool isRight, float duration)
 }
 enum RotState
