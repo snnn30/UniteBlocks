@@ -19,8 +19,6 @@ public class PlayerRotate : MonoBehaviour
     bool Rotate(float value)
     {
         var isRight = (value < 0) ? false : true;
-        // var intVal = (value < 0) ? 3 : 1;
-        // RotState rot = (RotState)((int)(_state.Rotation + intVal) % 4);
         return _state.SetRotation(isRight, _rotateDelay);
     }
 

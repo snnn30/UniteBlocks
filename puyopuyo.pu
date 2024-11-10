@@ -15,10 +15,10 @@ enum PuyoType
 class PlayerRotate
 class PlayerMove
 class PlayerState{
-    +bool SetPosition(Vector2Int direction, float duration)
+    +bool SetPosition(Direction direction, float duration)
     +bool SetRotation(bool isRight, float duration)
 }
-enum RotState
+enum Direction
 
 BoardController --> PuyoController
 BoardController ..> PuyoType
@@ -29,9 +29,10 @@ PuyoCollerTable --> PuyoType
 
 PlayerRotate --> PlayerState
 PlayerMove --> PlayerState
+PlayerMove ..> Direction
 PlayerState --> PuyoController
 PlayerState --> BoardController
-PlayerState *- RotState
+PlayerState *- Direction
 
 
 @enduml

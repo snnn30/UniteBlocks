@@ -7,6 +7,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static PlayerState;
 
 public class PlayerMove : MonoBehaviour
 {
@@ -20,10 +21,10 @@ public class PlayerMove : MonoBehaviour
     CancellationTokenSource _moveCTS;
 
 
-    bool Move(float direction, float duration)
+    bool Move(float value, float duration)
     {
-        Vector2Int dirVec = (direction < 0) ? Vector2Int.left : Vector2Int.right;
-        return _state.SetPosition(dirVec, duration);
+        Direction direction = (value < 0) ? Direction.Left : Direction.Right;
+        return _state.SetPosition(direction, duration);
     }
 
     void OnMoveStarted(InputAction.CallbackContext context)
@@ -59,7 +60,7 @@ public class PlayerMove : MonoBehaviour
 
     bool Drop()
     {
-        return _state.SetPosition(Vector2Int.down, _dropDelay);
+        return _state.SetPosition(Direction.Down, _dropDelay);
     }
 
     void StartAutoDrop()
