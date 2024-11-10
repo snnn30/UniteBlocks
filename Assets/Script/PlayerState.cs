@@ -33,12 +33,21 @@ public class PlayerState : MonoBehaviour
         if (!(direction.x == 0 ^ direction.y == 0)) return false;
 
         var targetPos = Position + direction;
-
         if (!CanSet(targetPos, Rotation)) { return false; }
 
         Vector3 relativeParentVec = new Vector3(direction.x, direction.y, 0);
-
-        this.transform.DOBlendableLocalMoveBy(relativeParentVec, duration);
+        if (relativeParentVec.y == 0)
+        {
+            this.transform
+                .DOBlendableLocalMoveBy(relativeParentVec, duration)
+                .SetEase(Ease.OutQuart);
+        }
+        else
+        {
+            this.transform
+                .DOBlendableLocalMoveBy(relativeParentVec, duration)
+                .SetEase(Ease.Linear);
+        }
 
         Position = targetPos;
         return true;
@@ -60,7 +69,9 @@ public class PlayerState : MonoBehaviour
         }
 
         if (!CanSet(Position, targetRot)) { return false; }
-        this.transform.DOBlendableLocalRotateBy(value, duration);
+        this.transform
+            .DOBlendableLocalRotateBy(value, duration)
+            .SetEase(Ease.OutQuart);
 
         Rotation = targetRot;
         return true;
