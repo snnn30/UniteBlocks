@@ -5,7 +5,6 @@ class BoardController{
 }
 class PuyoController{
     +PuyoType : PuyoType
-    +void SetPos(Vector2 pos)
 }
 class PuyoCollerTable{
     +SerializableDictionary<PuyoType, Color> PuyoColooers
@@ -17,9 +16,8 @@ class PlayerRotate
 class PlayerMove
 class PlayerState{
     +Vector2Int Position
-    +RotState Rotation
-    +bool SetPosition(Vector2Int targetPos)
-    +bool SetRotation(RotState targetRot)
+    +bool SetPosition(Vector2Int targetPos, float duration)
+    +bool SetRotation(bool isRight, float duration)
 }
 enum RotState
 
@@ -31,11 +29,10 @@ PuyoCollerTable --> SerializableDictionary
 PuyoCollerTable --> PuyoType
 
 PlayerRotate --> PlayerState
-PlayerRotate ..> RotState
 PlayerMove --> PlayerState
 PlayerState --> PuyoController
 PlayerState --> BoardController
-PlayerState --> RotState
+PlayerState *- RotState
 
 
 @enduml

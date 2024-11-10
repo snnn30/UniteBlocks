@@ -7,7 +7,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using static PlayerState;
 
 public class PlayerRotate : MonoBehaviour
 {
@@ -19,9 +18,10 @@ public class PlayerRotate : MonoBehaviour
 
     bool Rotate(float value)
     {
-        var intVal = (value < 0) ? 3 : 1;
-        RotState rot = (RotState)((int)(_state.Rotation + intVal) % 4);
-        return _state.SetRotation(rot);
+        var isRight = (value < 0) ? false : true;
+        // var intVal = (value < 0) ? 3 : 1;
+        // RotState rot = (RotState)((int)(_state.Rotation + intVal) % 4);
+        return _state.SetRotation(isRight, _rotateDelay);
     }
 
     void OnRotateStarted(InputAction.CallbackContext callbackContext)

@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using UniRx;
+using DG.Tweening;
 using UnityEngine;
 
 public class PlayerState : MonoBehaviour
@@ -11,13 +11,11 @@ public class PlayerState : MonoBehaviour
     [SerializeField] PuyoController[] _puyoControllers = new PuyoController[2];
     [SerializeField] BoardController _boardController;
 
-    ReactiveProperty<Vector2Int> _positionRP = new ReactiveProperty<Vector2Int>();
-
-    ReactiveProperty<RotState> _rotationRP = new ReactiveProperty<RotState>();
-    public enum RotState
+    enum RotState
     {
         Up, Right, Down, Left,
     }
+
     static readonly Dictionary<RotState, Vector2Int> rotateDic = new Dictionary<RotState, Vector2Int>()
     {
         [RotState.Down] = Vector2Int.down,
@@ -26,22 +24,40 @@ public class PlayerState : MonoBehaviour
         [RotState.Right] = Vector2Int.right,
     };
 
-    public Vector2Int Position => _positionRP.Value;
-    public RotState Rotation => _rotationRP.Value;
+    public Vector2Int Position { get; private set; }
+    RotState Rotation { get; set; }
 
 
-
-    public bool SetPosition(Vector2Int targetPos)
+    public bool SetPosition(Vector2Int targetPos, float duration)
     {
-        if (!CanSet(targetPos, _rotationRP.Value)) { return false; }
-        _positionRP.Value = targetPos;
+        if (!CanSet(targetPos, Rotation)) { return false; }
+        Vector3 relativeParentVec = new Vector3(targetPos.x - Position.x, targetPos.y - Position.y, 0);
+
+        this.transform.DOBlendableLocalMoveBy(relativeParentVec, duration);
+
+        Position = targetPos;
         return true;
     }
 
-    public bool SetRotation(RotState targetRot)
+    public bool SetRotation(bool isRight, float duration)
     {
-        if (!CanSet(_positionRP.Value, targetRot)) { return false; }
-        _rotationRP.Value = targetRot;
+        RotState targetRot;
+        Vector3 value;
+        if (isRight)
+        {
+            targetRot = (RotState)((int)(Rotation + 1) % 4);
+            value = new Vector3(0, 0, -90);
+        }
+        else
+        {
+            targetRot = (RotState)((int)(Rotation + 3) % 4);
+            value = new Vector3(0, 0, 90);
+        }
+
+        if (!CanSet(Position, targetRot)) { return false; }
+        this.transform.DOBlendableLocalRotateBy(value, duration);
+
+        Rotation = targetRot;
         return true;
     }
 
@@ -57,26 +73,13 @@ public class PlayerState : MonoBehaviour
         return pos + rotateDic[rot];
     }
 
-    void PosUpdate()
-    {
-        _puyoControllers[0].SetPos(_positionRP.Value);
-        var childPos = CalcChildPuyoPos(_positionRP.Value, _rotationRP.Value);
-        _puyoControllers[1].SetPos(childPos);
-    }
-
     private void Awake()
     {
-        _rotationRP.Value = RotState.Up;
-        _positionRP.Value = new Vector2Int(2, 12);
-
-        _positionRP.Subscribe(pos =>
-        {
-            PosUpdate();
-        });
-        _rotationRP.Subscribe(rot =>
-        {
-            PosUpdate();
-        });
+        Rotation = RotState.Up;
+        Position = new Vector2Int(2, 12);
+        this.transform.localPosition = new Vector3(Position.x, Position.y, 0);
+        var childPos = CalcChildPuyoPos(Position, Rotation);
+        _puyoControllers[1].transform.localPosition = new Vector3(0, 1, 0);
     }
 
     private void Start()

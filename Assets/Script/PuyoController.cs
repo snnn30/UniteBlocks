@@ -29,8 +29,4 @@ public class PuyoController : MonoBehaviour
         _renderer = GetComponent<SpriteRenderer>();
     }
 
-    public void SetPos(Vector2 pos)
-    {
-        this.transform.localPosition = pos;
-    }
 }

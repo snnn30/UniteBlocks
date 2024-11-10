@@ -26,14 +26,14 @@ public class PlayerMove : MonoBehaviour
         return _state.Position + normalizedDir;
     }
 
-    bool Move(float direction)
+    bool Move(float direction, float duration)
     {
-        return _state.SetPosition(CalcMovePos(direction));
+        return _state.SetPosition(CalcMovePos(direction), duration);
     }
 
     void OnMoveStarted(InputAction.CallbackContext context)
     {
-        Move(context.ReadValue<float>());
+        Move(context.ReadValue<float>(), _moveDelay);
     }
 
     void OnMovePerformed(InputAction.CallbackContext context)
@@ -44,7 +44,7 @@ public class PlayerMove : MonoBehaviour
         {
             while (true)
             {
-                Move(context.ReadValue<float>());
+                Move(context.ReadValue<float>(), _moveDelay);
                 await UniTask.Delay(TimeSpan.FromSeconds(_moveDelay), cancellationToken: token);
             }
         }
@@ -64,7 +64,7 @@ public class PlayerMove : MonoBehaviour
 
     bool Drop()
     {
-        return _state.SetPosition(_state.Position + Vector2Int.down);
+        return _state.SetPosition(_state.Position + Vector2Int.down, _dropDelay);
     }
 
     void StartAutoDrop()
