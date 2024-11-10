@@ -33,6 +33,15 @@ public class PlayerState : MonoBehaviour
     {
         var vec2 = directionVec[direction];
         var targetPos = Position + vec2;
+
+        if (direction == Direction.Down && !CanSet(targetPos, Rotation))
+        {
+            _boardController.Settle(Position, _puyoControllers[0]);
+            _boardController.Settle(CalcChildPuyoPos(Position, Rotation), _puyoControllers[1]);
+            ChangeOperationPuyos();
+            return false;
+        }
+
         if (!CanSet(targetPos, Rotation)) { return false; }
 
         Vector3 vec3 = new Vector3(vec2.x, vec2.y, 0);

@@ -11,6 +11,7 @@ public class BoardController : MonoBehaviour
     PuyoController[,] _puyos = new PuyoController[BOARD_HEIGHT, BOARD_WIDTH];
 
     [SerializeField] PuyoController _prefabPuyo;
+    [SerializeField] GameObject _puyosContainer;
 
     void ClearAll()
     {
@@ -51,8 +52,21 @@ public class BoardController : MonoBehaviour
             return false;
 
         Vector3 worldPos = transform.position + new Vector3(pos.x, pos.y, 0f);
-        _puyos[pos.y, pos.x] = Instantiate(_prefabPuyo, worldPos, transform.rotation, transform);
+        _puyos[pos.y, pos.x] = Instantiate(_prefabPuyo, worldPos, transform.rotation, _puyosContainer.transform);
         _puyos[pos.y, pos.x].PuyoType = puyoType;
+
+        return true;
+    }
+
+    public bool Settle(Vector2Int pos, PuyoController puyoController)
+    {
+        if (!CanSettle(pos))
+            return false;
+
+        puyoController.transform.parent = _puyosContainer.transform;
+
+        Vector3 worldPos = transform.position + new Vector3(pos.x, pos.y, 0f);
+        _puyos[pos.y, pos.x] = puyoController;
 
         return true;
     }

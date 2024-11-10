@@ -20,7 +20,7 @@ class PlayerState{
 }
 enum Direction
 class WatingPuyos{
-    +PuyoController[2] GetNextPuyos()
+    +PuyoController[] GetNextPuyos()
 }
 
 BoardController --> PuyoController
@@ -37,7 +37,7 @@ PlayerState --> PuyoController
 PlayerState --> BoardController
 PlayerState *- Direction
 PlayerState *-- WatingPuyos
-WatingPuyos --> Pyoco
+WatingPuyos --> PuyoController
 
 
 @enduml
