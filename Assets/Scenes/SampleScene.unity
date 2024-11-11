@@ -940,6 +940,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _prefabPuyo: {fileID: 2820339082344813231, guid: 5f58a7f727f54fb4380c58b98dc4f7a9, type: 3}
   _puyosContainer: {fileID: 21047126}
+  _dropSpeed: 0.5
 --- !u!4 &1637832477 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7622930813090849852, guid: 5f58a7f727f54fb4380c58b98dc4f7a9, type: 3}

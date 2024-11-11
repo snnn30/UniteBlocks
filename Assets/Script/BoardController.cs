@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using UnityEngine;
 
 public class BoardController : MonoBehaviour
@@ -12,6 +15,7 @@ public class BoardController : MonoBehaviour
 
     [SerializeField] PuyoController _prefabPuyo;
     [SerializeField] GameObject _puyosContainer;
+    [SerializeField] float _dropSpeed = 0.5f;
 
     void ClearAll()
     {
@@ -69,6 +73,53 @@ public class BoardController : MonoBehaviour
         _puyos[pos.y, pos.x] = puyoController;
 
         return true;
+    }
+
+    public async UniTask DropToBottom()
+    {
+        List<Tween> activeTweens = new List<Tween>();
+        PuyoController[,] puyos = new PuyoController[BOARD_HEIGHT, BOARD_WIDTH];
+
+        for (int y = 0; y < BOARD_HEIGHT; y++)
+        {
+            for (int x = 0; x < BOARD_WIDTH; x++)
+            {
+                if (_puyos[y, x] == null) continue;
+
+                int p = y;
+                for (int i = y; i >= 0; i--)
+                {
+                    if (_puyos[i, x] == null)
+                    {
+                        p = i;
+                    }
+                }
+
+                if (p == y)
+                {
+                    puyos[p, x] = _puyos[y, x];
+                    continue;
+                }
+
+                var tween = _puyos[y, x].transform
+                    .DOLocalMoveY(p, _dropSpeed)
+                    .SetEase(Ease.OutBounce);
+                activeTweens.Add(tween);
+                tween.OnKill(() => activeTweens.Remove(tween));
+
+                puyos[p, x] = _puyos[y, x];
+
+            }
+        }
+
+        _puyos = puyos;
+
+        while (activeTweens.Count != 0)
+        {
+            await UniTask.Yield();
+        }
+
+        return;
     }
 
 

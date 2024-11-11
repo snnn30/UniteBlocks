@@ -13,7 +13,7 @@ public class PlayerState : MonoBehaviour
     [SerializeField] BoardController _boardController;
     [SerializeField] WaitingPuyos _waitingPuyos;
     bool isAcceptingInput = true;
-
+    private List<Tween> activeTweens = new List<Tween>();
 
     public enum Direction
     {
@@ -42,12 +42,13 @@ public class PlayerState : MonoBehaviour
         if (direction == Direction.Down && !CanSet(targetPos, Rotation))
         {
             isAcceptingInput = false;
-            while (DOTween.TotalPlayingTweens() != 0)
+            while (activeTweens.Count != 0)
             {
                 await UniTask.Yield();
             }
             _boardController.Settle(Position, _puyoControllers[0]);
             _boardController.Settle(CalcChildPuyoPos(Position, Rotation), _puyoControllers[1]);
+            await _boardController.DropToBottom();
             ChangeOperationPuyos();
             isAcceptingInput = true;
             return;
@@ -57,18 +58,24 @@ public class PlayerState : MonoBehaviour
 
         Vector3 vec3 = new Vector3(vec2.x, vec2.y, 0);
 
+        Tween tween;
+
         switch (direction)
         {
             case Direction.Left:
             case Direction.Right:
-                this.transform
+                tween = this.transform
                     .DOBlendableLocalMoveBy(vec3, duration)
                     .SetEase(Ease.OutQuart);
+                activeTweens.Add(tween);
+                tween.OnKill(() => activeTweens.Remove(tween));
                 break;
             case Direction.Down:
-                this.transform
+                tween = this.transform
                     .DOBlendableLocalMoveBy(vec3, duration)
                     .SetEase(Ease.Linear);
+                activeTweens.Add(tween);
+                tween.OnKill(() => activeTweens.Remove(tween));
                 break;
             case Direction.Up:
                 return;
@@ -97,9 +104,11 @@ public class PlayerState : MonoBehaviour
 
         if (!CanSet(Position, targetRot)) { return false; }
 
-        this.transform
+        var tween = this.transform
             .DOBlendableLocalRotateBy(value, duration)
             .SetEase(Ease.OutQuart);
+        activeTweens.Add(tween);
+        tween.OnKill(() => activeTweens.Remove(tween));
 
         Rotation = targetRot;
         return true;

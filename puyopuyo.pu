@@ -2,6 +2,7 @@
 class BoardController{
     +bool CanSettle(Vector2Int pos) 
     +bool Settle(Vector2Int pos, PuyoType puyoType)
+    +void DropToBottom()
 }
 class PuyoController{
     +PuyoType : PuyoType
