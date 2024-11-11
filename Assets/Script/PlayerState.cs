@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 
@@ -11,6 +12,8 @@ public class PlayerState : MonoBehaviour
     PuyoController[] _puyoControllers = new PuyoController[2];
     [SerializeField] BoardController _boardController;
     [SerializeField] WaitingPuyos _waitingPuyos;
+    bool isAcceptingInput = true;
+
 
     public enum Direction
     {
@@ -29,20 +32,28 @@ public class PlayerState : MonoBehaviour
     Direction Rotation { get; set; }
 
 
-    public bool SetPosition(Direction direction, float duration)
+    public async void SetPosition(Direction direction, float duration)
     {
+        if (!isAcceptingInput) { return; }
+
         var vec2 = directionVec[direction];
         var targetPos = Position + vec2;
 
         if (direction == Direction.Down && !CanSet(targetPos, Rotation))
         {
+            isAcceptingInput = false;
+            while (DOTween.TotalPlayingTweens() != 0)
+            {
+                await UniTask.Yield();
+            }
             _boardController.Settle(Position, _puyoControllers[0]);
             _boardController.Settle(CalcChildPuyoPos(Position, Rotation), _puyoControllers[1]);
             ChangeOperationPuyos();
-            return false;
+            isAcceptingInput = true;
+            return;
         }
 
-        if (!CanSet(targetPos, Rotation)) { return false; }
+        if (!CanSet(targetPos, Rotation)) { return; }
 
         Vector3 vec3 = new Vector3(vec2.x, vec2.y, 0);
 
@@ -60,15 +71,17 @@ public class PlayerState : MonoBehaviour
                     .SetEase(Ease.Linear);
                 break;
             case Direction.Up:
-                return false;
+                return;
         }
 
         Position = targetPos;
-        return true;
+        return;
     }
 
     public bool SetRotation(bool isRight, float duration)
     {
+        if (!isAcceptingInput) return false;
+
         Direction targetRot;
         Vector3 value;
         if (isRight)

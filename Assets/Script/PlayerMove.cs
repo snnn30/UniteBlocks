@@ -21,10 +21,10 @@ public class PlayerMove : MonoBehaviour
     CancellationTokenSource _moveCTS;
 
 
-    bool Move(float value, float duration)
+    void Move(float value, float duration)
     {
         Direction direction = (value < 0) ? Direction.Left : Direction.Right;
-        return _state.SetPosition(direction, duration);
+        _state.SetPosition(direction, duration);
     }
 
     void OnMoveStarted(InputAction.CallbackContext context)
@@ -58,9 +58,9 @@ public class PlayerMove : MonoBehaviour
     }
 
 
-    bool Drop()
+    void Drop()
     {
-        return _state.SetPosition(Direction.Down, _dropDelay);
+        _state.SetPosition(Direction.Down, _dropDelay);
     }
 
     void StartAutoDrop()
