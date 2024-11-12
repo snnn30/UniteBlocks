@@ -17,9 +17,12 @@ class PlayerRotate
 class PlayerMove
 class PlayerDrop
 class PlayerState{
-    +void ShiftYDrop(float moveAmount)
-    +void ShiftX(bool isRight, float duration)
-    +bool Turn90Degrees(bool isRight, float duration)
+    +Vector2Int Position
+    +Direction Rotation    
+    +bool IsAcceptingInput
+    +List<Tween> ActiveTweens
+    +void GroundingProcess()
+    +bool CanSet(Vector2Int pos, Directoin rot)
 }
 enum Direction
 class WatingPuyos{
@@ -40,7 +43,7 @@ PlayerMove --> PlayerState
 PlayerState --> PuyoController
 PlayerState --> BoardController
 PlayerState *- Direction
-PlayerState *-- WatingPuyos
+PlayerState --> WatingPuyos
 WatingPuyos --> PuyoController
 
 

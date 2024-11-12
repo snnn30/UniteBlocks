@@ -5,8 +5,10 @@
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static PlayerState;
 
 public class PlayerRotate : MonoBehaviour
 {
@@ -16,10 +18,34 @@ public class PlayerRotate : MonoBehaviour
     PlayerState _state;
     CancellationTokenSource _cancellationTokenSource;
 
+
     void Rotate(float value)
     {
         var isRight = (value < 0) ? false : true;
-        _state.Turn90Degrees(isRight, _rotateDelay);
+        Direction targetRot;
+        Vector3 moveAmout;
+        if (isRight)
+        {
+            targetRot = (Direction)((int)(_state.Rotation + 1) % 4);
+            moveAmout = new Vector3(0, 0, -90);
+        }
+        else
+        {
+            targetRot = (Direction)((int)(_state.Rotation + 3) % 4);
+            moveAmout = new Vector3(0, 0, 90);
+        }
+
+        if (!_state.IsAcceptingInput) { return; }
+        if (!_state.CanSet(_state.Position, targetRot)) { return; }
+
+        var tween = this.transform
+            .DOBlendableLocalRotateBy(moveAmout, _rotateDelay)
+            .SetEase(Ease.OutQuart);
+        _state.ActiveTweens.Add(tween);
+        tween.OnKill(() => _state.ActiveTweens.Remove(tween));
+
+        _state.Rotation = targetRot;
+        return;
     }
 
     void OnRotateStarted(InputAction.CallbackContext callbackContext)
@@ -49,6 +75,7 @@ public class PlayerRotate : MonoBehaviour
         }
 
     }
+
 
     private void Awake()
     {

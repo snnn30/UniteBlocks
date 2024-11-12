@@ -15,10 +15,27 @@ public class PlayerDrop : MonoBehaviour
     PlayerState _state;
 
 
-    void Drop()
+
+    async void Drop()
     {
         float moveAmout = Time.deltaTime / _dropDelay;
-        _state.ShiftYDown(moveAmout);
+        Vector2Int targetPos = new Vector2Int(_state.Position.x, Mathf.FloorToInt(transform.localPosition.y - moveAmout));
+
+        if (!_state.IsAcceptingInput) { return; }
+
+        if (!_state.CanSet(targetPos, _state.Rotation))
+        {
+            await _state.GroundingProcess();
+            return;
+        }
+
+        transform.localPosition -= new Vector3(0, moveAmout, 0);
+        if (transform.localPosition.y < _state.Position.y)
+        {
+            _state.Position = targetPos;
+        }
+
+        return;
     }
 
     void OnDropPerformed(InputAction.CallbackContext context)
@@ -43,7 +60,6 @@ public class PlayerDrop : MonoBehaviour
     {
         Drop();
     }
-
 
     private void OnEnable()
     {

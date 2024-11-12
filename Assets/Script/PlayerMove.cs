@@ -5,6 +5,7 @@
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -17,15 +18,30 @@ public class PlayerMove : MonoBehaviour
     CancellationTokenSource _moveCTS;
 
 
-    void Move(float value, float duration)
+    void Move(float value)
     {
-        var isRight = (value < 0) ? false : true;
-        _state.ShiftX(isRight, duration);
+        var direction = (value < 0) ? Vector2Int.left : Vector2Int.right;
+        var targetPos = _state.Position + direction;
+
+        if (!_state.IsAcceptingInput) { return; }
+        if (!_state.CanSet(targetPos, _state.Rotation)) { return; }
+
+
+        Vector3 vec3 = new Vector3(direction.x, direction.y, 0);
+
+        Tween tween = this.transform
+            .DOBlendableLocalMoveBy(vec3, _moveDelay)
+            .SetEase(Ease.OutQuart);
+        _state.ActiveTweens.Add(tween);
+        tween.OnKill(() => _state.ActiveTweens.Remove(tween));
+
+        _state.Position = targetPos;
+        return;
     }
 
     void OnMoveStarted(InputAction.CallbackContext context)
     {
-        Move(context.ReadValue<float>(), _moveDelay);
+        Move(context.ReadValue<float>());
     }
 
     void OnMovePerformed(InputAction.CallbackContext context)
@@ -36,7 +52,7 @@ public class PlayerMove : MonoBehaviour
         {
             while (true)
             {
-                Move(context.ReadValue<float>(), _moveDelay);
+                Move(context.ReadValue<float>());
                 await UniTask.Delay(TimeSpan.FromSeconds(_moveDelay), cancellationToken: token);
             }
         }
