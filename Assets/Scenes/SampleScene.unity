@@ -793,7 +793,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _moveDelay: 0.12
   _autoDropDelay: 0.36
-  _manualDropDelay: 0.12
+  _manualDropDelay: 0.08
 --- !u!114 &892744481
 MonoBehaviour:
   m_ObjectHideFlags: 0

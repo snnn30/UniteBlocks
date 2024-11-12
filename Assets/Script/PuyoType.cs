@@ -11,8 +11,6 @@ public enum PuyoType
     Red,
     Yellow,
     Blue,
-    Purple,
-    Cyan,
 };
 
 [CreateAssetMenu(menuName = "ScriptableObject/PuyoColorTable")]
