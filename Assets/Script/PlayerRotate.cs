@@ -16,10 +16,10 @@ public class PlayerRotate : MonoBehaviour
     PlayerState _state;
     CancellationTokenSource _cancellationTokenSource;
 
-    bool Rotate(float value)
+    void Rotate(float value)
     {
         var isRight = (value < 0) ? false : true;
-        return _state.SetRotation(isRight, _rotateDelay);
+        _state.Turn90Degrees(isRight, _rotateDelay);
     }
 
     void OnRotateStarted(InputAction.CallbackContext callbackContext)

@@ -782,7 +782,7 @@
                     "id": "6ed974e8-af79-4c34-8d5b-267eaf8e6d5f",
                     "expectedControlType": "Axis",
                     "processors": "",
-                    "interactions": "Hold(duration=0.3,pressPoint=0.8)",
+                    "interactions": "Hold(duration=0.2,pressPoint=0.8)",
                     "initialStateCheck": true
                 },
                 {
@@ -791,7 +791,7 @@
                     "id": "9075cef9-2f4d-4ccd-8188-e15ca47e94d3",
                     "expectedControlType": "Axis",
                     "processors": "",
-                    "interactions": "Hold(duration=0.4,pressPoint=0.8)",
+                    "interactions": "Hold(duration=0.3,pressPoint=0.8)",
                     "initialStateCheck": true
                 },
                 {

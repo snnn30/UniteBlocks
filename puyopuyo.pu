@@ -15,9 +15,11 @@ enum PuyoType
 
 class PlayerRotate
 class PlayerMove
+class PlayerDrop
 class PlayerState{
-    +void SetPosition(Direction direction, float duration)
-    +bool SetRotation(bool isRight, float duration)
+    +void ShiftYDrop(float moveAmount)
+    +void ShiftX(bool isRight, float duration)
+    +bool Turn90Degrees(bool isRight, float duration)
 }
 enum Direction
 class WatingPuyos{
@@ -31,9 +33,10 @@ PuyoController --> PuyoType
 PuyoCollerTable --> SerializableDictionary
 PuyoCollerTable --> PuyoType
 
+PlayerDrop --> PlayerState
 PlayerRotate --> PlayerState
 PlayerMove --> PlayerState
-PlayerMove ..> Direction
+
 PlayerState --> PuyoController
 PlayerState --> BoardController
 PlayerState *- Direction

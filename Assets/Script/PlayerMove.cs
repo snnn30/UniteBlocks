@@ -7,15 +7,11 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using static PlayerState;
 
 public class PlayerMove : MonoBehaviour
 {
     [SerializeField] float _moveDelay = 0.12f;
-    [SerializeField] float _autoDropDelay = 0.36f;
-    [SerializeField] float _manualDropDelay = 0.24f;
 
-    float _dropDelay;
     PlayerInput _input;
     PlayerState _state;
     CancellationTokenSource _moveCTS;
@@ -23,8 +19,8 @@ public class PlayerMove : MonoBehaviour
 
     void Move(float value, float duration)
     {
-        Direction direction = (value < 0) ? Direction.Left : Direction.Right;
-        _state.SetPosition(direction, duration);
+        var isRight = (value < 0) ? false : true;
+        _state.ShiftX(isRight, duration);
     }
 
     void OnMoveStarted(InputAction.CallbackContext context)
@@ -58,37 +54,6 @@ public class PlayerMove : MonoBehaviour
     }
 
 
-    void Drop()
-    {
-        _state.SetPosition(Direction.Down, _dropDelay);
-    }
-
-    void StartAutoDrop()
-    {
-        _dropDelay = _autoDropDelay;
-        CancellationToken token = this.GetCancellationTokenOnDestroy();
-        DropContinuous(token).Forget();
-        async UniTask DropContinuous(CancellationToken token)
-        {
-            while (true)
-            {
-                Drop();
-                await UniTask.Delay(TimeSpan.FromSeconds(_dropDelay), cancellationToken: token);
-            }
-        }
-    }
-
-    void OnDropPerformed(InputAction.CallbackContext context)
-    {
-        _dropDelay = _manualDropDelay;
-    }
-
-    void OnDropCanceled(InputAction.CallbackContext context)
-    {
-        _dropDelay = _autoDropDelay;
-    }
-
-
     private void OnDestroy()
     {
         if (_moveCTS != null)
@@ -105,19 +70,11 @@ public class PlayerMove : MonoBehaviour
         _state = GetComponent<PlayerState>();
     }
 
-    private void Start()
-    {
-        StartAutoDrop();
-    }
-
     private void OnEnable()
     {
         _input.actions["Move"].started += OnMoveStarted;
         _input.actions["Move"].performed += OnMovePerformed;
         _input.actions["Move"].canceled += OnMoveCanceled;
-
-        _input.actions["Drop"].performed += OnDropPerformed;
-        _input.actions["Drop"].canceled += OnDropCanceled;
     }
 
     private void OnDisable()
@@ -125,8 +82,5 @@ public class PlayerMove : MonoBehaviour
         _input.actions["Move"].started -= OnMoveStarted;
         _input.actions["Move"].performed -= OnMovePerformed;
         _input.actions["Move"].canceled -= OnMoveCanceled;
-
-        _input.actions["Drop"].performed -= OnDropPerformed;
-        _input.actions["Drop"].canceled -= OnDropCanceled;
     }
 }

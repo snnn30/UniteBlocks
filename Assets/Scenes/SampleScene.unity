@@ -657,6 +657,7 @@ GameObject:
   - component: {fileID: 892744482}
   - component: {fileID: 892744481}
   - component: {fileID: 892744480}
+  - component: {fileID: 892744483}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -792,8 +793,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _moveDelay: 0.12
-  _autoDropDelay: 0.36
-  _manualDropDelay: 0.08
 --- !u!114 &892744481
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -821,6 +820,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _boardController: {fileID: 1262082768}
   _waitingPuyos: {fileID: 564983539}
+--- !u!114 &892744483
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 892744476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c8a952db18ed8d499d728f282c81c76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _autoDropDelay: 0.48
+  _manualDropDelay: 0.08
 --- !u!1001 &1066481746
 PrefabInstance:
   m_ObjectHideFlags: 0
