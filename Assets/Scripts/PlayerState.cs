@@ -30,7 +30,7 @@ public class PlayerState : MonoBehaviour
     public Direction Rotation { get; set; }
     public bool IsAcceptingInput { get; private set; } = true;
     public List<Tween> ActiveTweens { get; set; } = new List<Tween>();
-
+    public PuyoController[] PuyoControllers => _puyoControllers;
 
     public async UniTask GroundingProcess()
     {

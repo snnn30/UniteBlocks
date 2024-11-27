@@ -23,24 +23,41 @@ public class PlayerRotate : MonoBehaviour
     {
         var isRight = (value < 0) ? false : true;
         Direction targetRot;
-        Vector3 moveAmout;
+        float targetAmount;
+
         if (isRight)
         {
             targetRot = (Direction)((int)(_state.Rotation + 1) % 4);
-            moveAmout = new Vector3(0, 0, -90);
+            targetAmount = -90;
         }
         else
         {
             targetRot = (Direction)((int)(_state.Rotation + 3) % 4);
-            moveAmout = new Vector3(0, 0, 90);
+            targetAmount = 90;
         }
 
         if (!_state.IsAcceptingInput) { return; }
         if (!_state.CanSet(_state.Position, targetRot)) { return; }
 
-        var tween = this.transform
-            .DOBlendableLocalRotateBy(moveAmout, _rotateDelay)
-            .SetEase(Ease.OutQuart);
+        float currentAngle = 0;
+        var parentPuyo = _state.PuyoControllers[0];
+        var childPuyo = _state.PuyoControllers[1];
+
+        var tween = DOTween.To(
+            () => 0f,
+            x =>
+            {
+                var rotateAmount = x - currentAngle;
+                var quaternion = Quaternion.AngleAxis(rotateAmount, Vector3.forward);
+                childPuyo.transform.localPosition -= parentPuyo.transform.localPosition;
+                childPuyo.transform.localPosition = quaternion * childPuyo.transform.localPosition;
+                childPuyo.transform.localPosition += parentPuyo.transform.localPosition;
+                currentAngle = x;
+            },
+            targetAmount,
+            _rotateDelay
+            ).SetEase(Ease.OutQuad);
+
         _state.ActiveTweens.Add(tween);
         tween.OnKill(() => _state.ActiveTweens.Remove(tween));
 
