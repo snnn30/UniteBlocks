@@ -1,5 +1,7 @@
 @startuml hoge
 class BoardController{
+    {static} +Vector2Int START_POS
+    {static} +int MAX_HEIGHT
     +bool CanSettle(Vector2Int pos) 
     +bool Settle(Vector2Int pos, PuyoType puyoType)
     +void DropToBottom()

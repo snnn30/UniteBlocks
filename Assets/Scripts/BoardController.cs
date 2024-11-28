@@ -11,6 +11,8 @@ public class BoardController : MonoBehaviour
 {
     const int BOARD_WIDTH = 6;
     const int BOARD_HEIGHT = 14;
+    public static readonly Vector2Int START_POS = new Vector2Int(2, 13);
+    public static readonly int MAX_HEIGHT = 11;
     PuyoController[,] _puyos = new PuyoController[BOARD_HEIGHT, BOARD_WIDTH];
 
     [SerializeField] PuyoController _prefabPuyo;
@@ -45,7 +47,7 @@ public class BoardController : MonoBehaviour
             return false;
         }
 
-        if (pos.x != 2 && pos.y > 11)
+        if (pos.x != START_POS.x && pos.y > MAX_HEIGHT)
         {
             return false;
         }

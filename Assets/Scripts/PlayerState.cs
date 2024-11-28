@@ -41,8 +41,9 @@ public class PlayerState : MonoBehaviour
             await UniTask.Yield();
         }
 
-        if ((Position.x == 2 && Position.y == 11)
-            || (CalcChildPuyoPos(Position, Rotation).x == 2 && CalcChildPuyoPos(Position, Rotation).y == 11))
+        var childPos = CalcChildPuyoPos(Position, Rotation);
+        if ((Position.x == BoardController.START_POS.x && Position.y == BoardController.MAX_HEIGHT)
+            || (childPos.x == BoardController.START_POS.x && childPos.y == BoardController.MAX_HEIGHT))
         {
             _gameManager.OnGameOver();
         }
@@ -74,7 +75,7 @@ public class PlayerState : MonoBehaviour
     void ChangeOperationPuyos()
     {
         Rotation = Direction.Up;
-        var initialPos = new Vector2Int(2, 13);
+        var initialPos = BoardController.START_POS;
         Position = initialPos;
         this.transform.localPosition = new Vector3(Position.x, Position.y, 0);
 
