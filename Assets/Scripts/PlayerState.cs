@@ -12,6 +12,7 @@ public class PlayerState : MonoBehaviour
     PuyoController[] _puyoControllers = new PuyoController[2];
     [SerializeField] BoardController _boardController;
     [SerializeField] WaitingPuyos _waitingPuyos;
+    [SerializeField] GameManager _gameManager;
 
     public enum Direction
     {
@@ -43,7 +44,7 @@ public class PlayerState : MonoBehaviour
         if ((Position.x == 2 && Position.y == 11)
             || (CalcChildPuyoPos(Position, Rotation).x == 2 && CalcChildPuyoPos(Position, Rotation).y == 11))
         {
-            Debug.Log("GameOver");
+            _gameManager.OnGameOver();
         }
 
         // PlayerDrop.Drop()で発生する若干のずれを修正
@@ -85,13 +86,6 @@ public class PlayerState : MonoBehaviour
     }
 
 
-    private void Awake()
-    {
-        foreach (Transform n in this.transform)
-        {
-            GameObject.Destroy(n.gameObject);
-        }
-    }
 
     private void Start()
     {

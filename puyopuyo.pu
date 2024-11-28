@@ -21,12 +21,17 @@ class PlayerState{
     +Direction Rotation    
     +bool IsAcceptingInput
     +List<Tween> ActiveTweens
+    +PuyoController[] PuyoControllers
     +void GroundingProcess()
     +bool CanSet(Vector2Int pos, Directoin rot)
 }
 enum Direction
 class WatingPuyos{
     +PuyoController[] GetNextPuyos()
+}
+
+class GameManager{
+    +void OnGameOver()
 }
 
 BoardController --> PuyoController
@@ -44,6 +49,7 @@ PlayerState --> PuyoController
 PlayerState --> BoardController
 PlayerState *- Direction
 PlayerState --> WatingPuyos
+PlayerState =-> GameManager
 WatingPuyos --> PuyoController
 
 
