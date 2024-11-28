@@ -40,7 +40,8 @@ public class PlayerState : MonoBehaviour
             await UniTask.Yield();
         }
 
-        if (Position.y > 12)
+        if ((Position.x == 2 && Position.y == 11)
+            || (CalcChildPuyoPos(Position, Rotation).x == 2 && CalcChildPuyoPos(Position, Rotation).y == 11))
         {
             Debug.Log("GameOver");
         }

@@ -39,8 +39,18 @@ public class BoardController : MonoBehaviour
 
     static bool IsValidated(Vector2Int pos)
     {
-        return 0 <= pos.x && pos.x < BOARD_WIDTH
-            && 0 <= pos.y && pos.y < BOARD_HEIGHT;
+        if (!(0 <= pos.x && pos.x < BOARD_WIDTH
+            && 0 <= pos.y && pos.y < BOARD_HEIGHT))
+        {
+            return false;
+        }
+
+        if (pos.x != 2 && pos.y > 11)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     public bool CanSettle(Vector2Int pos)
