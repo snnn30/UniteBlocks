@@ -46,6 +46,7 @@ public class PlayerState : MonoBehaviour
             || (childPos.x == BoardController.START_POS.x && childPos.y == BoardController.MAX_HEIGHT))
         {
             _gameManager.OnGameOver();
+            return;
         }
 
         // PlayerDrop.Drop()で発生する若干のずれを修正
