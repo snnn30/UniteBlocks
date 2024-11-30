@@ -13,7 +13,7 @@ public class PuyoController : MonoBehaviour
 
     SpriteRenderer _renderer;
 
-    PuyoType _type = PuyoType.Invalid;
+    PuyoType _type;
     public PuyoType PuyoType
     {
         set
@@ -24,9 +24,25 @@ public class PuyoController : MonoBehaviour
         get { return _type; }
     }
 
+    Vector2Int _shape;
+    public Vector2Int Shape
+    {
+        set
+        {
+            _shape = value;
+            _renderer.size = value;
+        }
+        get { return _shape; }
+    }
+
+
+
+
     private void Awake()
     {
         _renderer = GetComponent<SpriteRenderer>();
+        PuyoType = PuyoType.Invalid;
+        Shape = new Vector2Int(1, 1);
     }
 
 }

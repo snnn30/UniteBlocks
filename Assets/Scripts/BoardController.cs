@@ -13,7 +13,8 @@ public class BoardController : MonoBehaviour
     const int BOARD_HEIGHT = 14;
     public static readonly Vector2Int START_POS = new Vector2Int(2, 13);
     public static readonly int MAX_HEIGHT = 11;
-    PuyoController[,] _puyos = new PuyoController[BOARD_HEIGHT, BOARD_WIDTH];
+    Vector2Int?[,] _coord = new Vector2Int?[BOARD_WIDTH, BOARD_HEIGHT];
+    PuyoController[,] _origins = new PuyoController[BOARD_WIDTH, BOARD_HEIGHT];
 
     [SerializeField] PuyoController _prefabPuyo;
     [SerializeField] GameObject _puyosContainer;
@@ -25,115 +26,214 @@ public class BoardController : MonoBehaviour
         {
             for (int x = 0; x < BOARD_WIDTH; x++)
             {
-                if (_puyos[y, x] != null)
-                {
-                    Destroy(_puyos[y, x]);
-                }
-                _puyos[y, x] = null;
+                _coord[x, y] = null;
+                if (_origins == null) { continue; }
+                Destroy(_origins[x, y]);
+                _origins[x, y] = null;
             }
         }
     }
 
-    private void Awake()
+    /// <summary>
+    /// そのマスが有効かどうかを検証
+    /// </summary>
+    bool IsValid(Vector2Int pos)
     {
-        ClearAll();
-    }
-
-    static bool IsValidated(Vector2Int pos)
-    {
-        if (!(0 <= pos.x && pos.x < BOARD_WIDTH
-            && 0 <= pos.y && pos.y < BOARD_HEIGHT))
-        {
-            return false;
-        }
-
-        if (pos.x != START_POS.x && pos.y > MAX_HEIGHT)
-        {
-            return false;
-        }
-
+        if (pos.x < 0 || BOARD_WIDTH <= pos.x) { return false; }
+        if (pos.y < 0 || BOARD_HEIGHT <= pos.y) { return false; }
         return true;
     }
 
+    /// <summary>
+    /// アイテムがおけるかを検証
+    /// </summary>
+    public bool CanSettle(Vector2Int pos, PuyoController puyo)
+    {
+        for (int x = pos.x; x < pos.x + puyo.Shape.x; x++)
+        {
+            for (int y = pos.y; y < pos.y + puyo.Shape.y; y++)
+            {
+                var target = new Vector2Int(x, y);
+                if (!IsValid(target)) { return false; }
+                if (_coord[x, y] != null) { return false; }
+            }
+        }
+        return true;
+    }
     public bool CanSettle(Vector2Int pos)
     {
-        if (!IsValidated(pos))
-            return false;
-        return _puyos[pos.y, pos.x] == null;
-    }
-
-    public bool Settle(Vector2Int pos, PuyoType puyoType)
-    {
-        if (!CanSettle(pos))
-            return false;
-
-        Vector3 worldPos = transform.position + new Vector3(pos.x, pos.y, 0f);
-        _puyos[pos.y, pos.x] = Instantiate(_prefabPuyo, worldPos, transform.rotation, _puyosContainer.transform);
-        _puyos[pos.y, pos.x].PuyoType = puyoType;
-
+        if (!IsValid(pos)) { return false; }
+        if (_coord[pos.x, pos.y] != null) { return false; }
         return true;
     }
 
-    public bool Settle(Vector2Int pos, PuyoController puyoController)
+    /// <summary>
+    /// アイテムを置く
+    /// </summary>
+    public void Settle(Vector2Int pos, PuyoController puyo)
     {
-        if (!CanSettle(pos))
-            return false;
+        if (!CanSettle(pos, puyo))
+        {
+            Debug.LogError("セット先が無効");
+            return;
+        }
 
-        puyoController.transform.parent = _puyosContainer.transform;
+        puyo.transform.parent = _puyosContainer.transform;
+        _origins[pos.x, pos.y] = puyo;
 
-        Vector3 worldPos = transform.position + new Vector3(pos.x, pos.y, 0f);
-        _puyos[pos.y, pos.x] = puyoController;
-
-        return true;
+        for (int x = pos.x; x < pos.x + puyo.Shape.x; x++)
+        {
+            for (int y = pos.y; y < pos.y + puyo.Shape.y; y++)
+            {
+                _coord[x, y] = pos;
+            }
+        }
     }
+
+    /// <summary>
+    /// アイテムを削除
+    /// </summary>
+    public void Delete(Vector2Int pos)
+    {
+        if (_origins[pos.x, pos.y] == null)
+        {
+            Debug.LogError("削除対象が存在しない");
+            return;
+        }
+
+        var puyo = _origins[pos.x, pos.y];
+
+        for (int x = pos.x; x < pos.x + puyo.Shape.x; x++)
+        {
+            for (int y = pos.y; y < pos.y + puyo.Shape.y; y++)
+            {
+                _coord[x, y] = null;
+            }
+        }
+
+        _origins[pos.x, pos.y] = null;
+    }
+
 
     public async UniTask DropToBottom()
     {
         List<Tween> activeTweens = new List<Tween>();
-        PuyoController[,] puyos = new PuyoController[BOARD_HEIGHT, BOARD_WIDTH];
 
         for (int y = 0; y < BOARD_HEIGHT; y++)
         {
             for (int x = 0; x < BOARD_WIDTH; x++)
             {
-                if (_puyos[y, x] == null) continue;
+                if (_origins[x, y] == null) { continue; }
 
-                int p = y;
-                for (int i = y; i >= 0; i--)
+                var puyo = _origins[x, y];
+                int targetHeight = y;
+
+                // 先に自身を消す事で自身に干渉しないようにする
+                Delete(new Vector2Int(x, y));
+
+                // 下の行を検査
+                for (int j = y - 1; j >= 0; j--)
                 {
-                    if (_puyos[i, x] == null)
-                    {
-                        p = i;
-                    }
+                    if (!CanSettle(new Vector2Int(x, j), puyo)) { break; }
+                    targetHeight--;
                 }
 
-                if (p == y)
-                {
-                    puyos[p, x] = _puyos[y, x];
-                    continue;
-                }
+                Settle(new Vector2Int(x, targetHeight), puyo);
 
-                var tween = _puyos[y, x].transform
-                    .DOLocalMoveY(p, _dropSpeed)
+                if (targetHeight == y) { continue; }
+
+                var tween = puyo.transform
+                    .DOLocalMoveY(targetHeight, _dropSpeed)
                     .SetEase(Ease.OutBounce);
                 activeTweens.Add(tween);
                 tween.OnKill(() => activeTweens.Remove(tween));
-
-                puyos[p, x] = _puyos[y, x];
-
             }
         }
-
-        _puyos = puyos;
 
         while (activeTweens.Count != 0)
         {
             await UniTask.Yield();
         }
 
-        return;
+        Combine();
     }
 
+    void Combine()
+    {
+        for (int y = 0; y < BOARD_HEIGHT; y++)
+        {
+            for (int x = 0; x < BOARD_WIDTH; x++)
+            {
+                if (_origins[x, y] == null) { continue; }
+                var puyo = _origins[x, y];
 
+                if (puyo.Shape == Vector2Int.one)
+                {
+                    var x1 = x + 1;
+                    var y1 = y + 1;
+                    Vector2Int[] targets = new Vector2Int[3];
+                    targets[0] = new Vector2Int(x1, y);
+                    targets[1] = new Vector2Int(x, y1);
+                    targets[2] = new Vector2Int(x1, y1);
+
+                    if (x1 == BOARD_WIDTH || y1 == BOARD_HEIGHT)
+                    {
+                        continue;
+                    }
+
+                    bool canCombine = true;
+                    foreach (var target in targets)
+                    {
+                        if (_origins[target.x, target.y] == null
+                            || _origins[target.x, target.y].Shape != Vector2Int.one
+                            || _origins[target.x, target.y].PuyoType != puyo.PuyoType)
+                        {
+                            canCombine = false;
+                            break;
+                        }
+                    }
+                    if (!canCombine) { continue; }
+
+                    foreach (var target in targets)
+                    {
+                        Destroy(_origins[target.x, target.y].gameObject);
+                        Delete(new Vector2Int(target.x, target.y));
+                        _coord[target.x, target.y] = new Vector2Int(x, y);
+                    }
+                    puyo.Shape = new Vector2Int(2, 2);
+
+                }
+
+
+                /*
+                // 一個右の列から検査 i,jは_puyos上の座標
+                for (int i = x + puyo.Shape.x; i < BOARD_WIDTH; i++)
+                {
+                    List<Vector2Int> deletePuyos = new List<Vector2Int>();
+                    bool skip = false;
+
+                    for (int j = y; j < y + puyo.Shape.y; j++)
+                    {
+                        deletePuyos.Add(new Vector2Int(i, j));
+                        if (_puyos[i, j] == null
+                            || _puyos[i, j].PuyoType != puyo.PuyoType
+                            || _puyos[i, j] == puyo)
+                        {
+                            skip = true;
+                        }
+                    }
+                    if (skip) { break; }
+
+                    foreach (Vector2Int delPos in deletePuyos)
+                    {
+                        Destroy(_puyos[delPos.x, delPos.y]);
+                        _puyos[delPos.x, delPos.y] = _puyos[x, y];
+                    }
+                    puyo.Shape = new Vector2Int(puyo.Shape.x + 1, puyo.Shape.y);
+                }
+                */
+            }
+        }
+    }
 
 }
