@@ -18,8 +18,10 @@ public class BoardController : MonoBehaviour
 
     [SerializeField] PuyoController _prefabPuyo;
     [SerializeField] GameObject _puyosContainer;
-    [SerializeField] float _dropSpeed = 0.5f;
     [SerializeField] GameManager _gameManager;
+    [SerializeField] float _dropSpeed = 0.5f;
+    [SerializeField] float _rotateTime = 1;
+
 
     void ClearAll()
     {
@@ -159,7 +161,7 @@ public class BoardController : MonoBehaviour
             await UniTask.Yield();
         }
 
-        Combine();
+        await Combine();
 
         return CheckGameOver();
     }
@@ -171,8 +173,10 @@ public class BoardController : MonoBehaviour
         return true;
     }
 
-    void Combine()
+    async UniTask Combine()
     {
+        List<Tween> tweens = new List<Tween>();
+
         for (int x = 0; x < BOARD_WIDTH; x++)
         {
             for (int y = 0; y < BOARD_HEIGHT; y++)
@@ -211,6 +215,25 @@ public class BoardController : MonoBehaviour
                     }
                 }
 
+                Vector3 center = new Vector3(x + (float)puyo.Shape.x / 2, y + (float)puyo.Shape.y / 2, 0);
+                center += transform.position;
+                float prex = 0f;
+
+                var tween = DOTween.To(
+                    () => 0f,
+                    x =>
+                    {
+                        var y = x - prex;
+                        puyo.gameObject.transform.RotateAround(center, Vector3.up, y);
+                        prex = x;
+                    },
+                    360f,
+                    _rotateTime
+                    ).SetEase(Ease.OutBack);
+                tweens.Add(tween);
+                tween.OnKill(() => tweens.Remove(tween));
+
+
 
                 // その範囲内がぷよで埋まっており、
                 // その範囲内のぷよが全部x0,y0のぷよと同じタイプであり、
@@ -248,6 +271,11 @@ public class BoardController : MonoBehaviour
 
 
             }
+        }
+
+        while (tweens.Count != 0)
+        {
+            await UniTask.Yield();
         }
     }
 
