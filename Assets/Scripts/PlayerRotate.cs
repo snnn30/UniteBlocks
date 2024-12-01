@@ -89,10 +89,21 @@ public class PlayerRotate : MonoBehaviour
         if (_cancellationTokenSource != null)
         {
             _cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Dispose();
+            _cancellationTokenSource = null;
         }
 
     }
 
+    private void OnDestroy()
+    {
+        if (_cancellationTokenSource != null)
+        {
+            _cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Dispose();
+            _cancellationTokenSource = null;
+        }
+    }
 
     private void Awake()
     {
