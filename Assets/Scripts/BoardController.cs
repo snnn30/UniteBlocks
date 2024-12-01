@@ -180,71 +180,71 @@ public class BoardController : MonoBehaviour
                 if (_origins[x, y] == null) { continue; }
                 var puyo = _origins[x, y];
 
-                if (puyo.Shape == Vector2Int.one)
+                Vector2Int targetShape = puyo.Shape;
+                List<Vector2Int> deletePuyos = new List<Vector2Int>();
+
+                // x,yを左下、i,jを右上の座標としたときの長方形を考える
+                for (int i = x + puyo.Shape.x - 1; i < BOARD_WIDTH; i++)
                 {
-                    var x1 = x + 1;
-                    var y1 = y + 1;
-                    Vector2Int[] targets = new Vector2Int[3];
-                    targets[0] = new Vector2Int(x1, y);
-                    targets[1] = new Vector2Int(x, y1);
-                    targets[2] = new Vector2Int(x1, y1);
-
-                    if (x1 == BOARD_WIDTH || y1 == BOARD_HEIGHT)
+                    for (int j = y + puyo.Shape.y - 1; j < BOARD_HEIGHT; j++)
                     {
-                        continue;
+                        if (!CheckInRange(x, y, i, j, ref deletePuyos)) { continue; }
+                        targetShape = new Vector2Int(i - x + 1, j - y + 1);
                     }
+                }
 
-                    bool canCombine = true;
-                    foreach (var target in targets)
+                if (targetShape.x < 2 || targetShape.y < 2) { continue; }
+                if (targetShape == puyo.Shape) { continue; }
+
+                foreach (var pos in deletePuyos)
+                {
+                    Destroy(_origins[pos.x, pos.y].gameObject);
+                    Delete(pos);
+                }
+
+                puyo.Shape = targetShape;
+                for (int i = x; i < x + targetShape.x; i++)
+                {
+                    for (int j = y; j < y + targetShape.y; j++)
                     {
-                        if (_origins[target.x, target.y] == null
-                            || _origins[target.x, target.y].Shape != Vector2Int.one
-                            || _origins[target.x, target.y].PuyoType != puyo.PuyoType)
-                        {
-                            canCombine = false;
-                            break;
-                        }
+                        _coord[i, j] = new Vector2Int(x, y);
                     }
-                    if (!canCombine) { continue; }
-
-                    foreach (var target in targets)
-                    {
-                        Destroy(_origins[target.x, target.y].gameObject);
-                        Delete(new Vector2Int(target.x, target.y));
-                        _coord[target.x, target.y] = new Vector2Int(x, y);
-                    }
-                    puyo.Shape = new Vector2Int(2, 2);
-
                 }
 
 
-                /*
-                // 一個右の列から検査 i,jは_puyos上の座標
-                for (int i = x + puyo.Shape.x; i < BOARD_WIDTH; i++)
+                // その範囲内がぷよで埋まっており、
+                // その範囲内のぷよが全部x0,y0のぷよと同じタイプであり、
+                // その範囲からはみ出ていなければtrue
+                bool CheckInRange(int x0, int y0, int x1, int y1, ref List<Vector2Int> deletePuyos)
                 {
-                    List<Vector2Int> deletePuyos = new List<Vector2Int>();
-                    bool skip = false;
+                    PuyoType type = _origins[x0, y0].PuyoType;
+                    List<Vector2Int> origins = new List<Vector2Int>();
 
-                    for (int j = y; j < y + puyo.Shape.y; j++)
+                    for (int i = x0; i <= x1; i++)
                     {
-                        deletePuyos.Add(new Vector2Int(i, j));
-                        if (_puyos[i, j] == null
-                            || _puyos[i, j].PuyoType != puyo.PuyoType
-                            || _puyos[i, j] == puyo)
+                        for (int j = y0; j <= y1; j++)
                         {
-                            skip = true;
+                            if (_coord[i, j] == null) { return false; }
+                            Vector2Int pos = (Vector2Int)_coord[i, j];
+                            if (origins.Contains(pos)) { continue; }
+                            origins.Add(pos);
                         }
                     }
-                    if (skip) { break; }
 
-                    foreach (Vector2Int delPos in deletePuyos)
+                    foreach (Vector2Int pos in origins)
                     {
-                        Destroy(_puyos[delPos.x, delPos.y]);
-                        _puyos[delPos.x, delPos.y] = _puyos[x, y];
+                        PuyoController target = _origins[pos.x, pos.y];
+                        if (target.PuyoType != type) { return false; }
+                        if (pos.x < x0 || pos.y < y0) { return false; }
+                        if (pos.x + target.Shape.x - 1 > x1 || pos.y + target.Shape.y - 1 > y1) { return false; }
                     }
-                    puyo.Shape = new Vector2Int(puyo.Shape.x + 1, puyo.Shape.y);
+
+                    origins.Remove(new Vector2Int(x0, y0));
+                    deletePuyos = origins;
+                    return true;
                 }
-                */
+
+
             }
         }
     }

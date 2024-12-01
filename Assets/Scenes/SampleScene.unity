@@ -982,7 +982,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _boardController: {fileID: 1262082768}
   _waitingPuyos: {fileID: 564983539}
-  _gameManager: {fileID: 1340963657}
 --- !u!114 &892744483
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1147,6 +1146,7 @@ MonoBehaviour:
   _prefabPuyo: {fileID: 2820339082344813231, guid: 5f58a7f727f54fb4380c58b98dc4f7a9, type: 3}
   _puyosContainer: {fileID: 21047126}
   _dropSpeed: 0.5
+  _gameManager: {fileID: 1340963657}
 --- !u!1 &1340963655
 GameObject:
   m_ObjectHideFlags: 0

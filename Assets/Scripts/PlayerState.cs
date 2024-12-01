@@ -40,6 +40,9 @@ public class PlayerState : MonoBehaviour
             await UniTask.Yield();
         }
 
+        // Drop()で発生する若干のずれを修正
+        transform.localPosition = new Vector3(Position.x, Position.y, 0);
+
         _boardController.Settle(Position, _puyoControllers[0]);
         _boardController.Settle(CalcChildPuyoPos(Position, Rotation), _puyoControllers[1]);
 
