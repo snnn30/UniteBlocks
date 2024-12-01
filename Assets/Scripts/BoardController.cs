@@ -173,9 +173,9 @@ public class BoardController : MonoBehaviour
 
     void Combine()
     {
-        for (int y = 0; y < BOARD_HEIGHT; y++)
+        for (int x = 0; x < BOARD_WIDTH; x++)
         {
-            for (int x = 0; x < BOARD_WIDTH; x++)
+            for (int y = 0; y < BOARD_HEIGHT; y++)
             {
                 if (_origins[x, y] == null) { continue; }
                 var puyo = _origins[x, y];
@@ -215,8 +215,10 @@ public class BoardController : MonoBehaviour
                 // その範囲内がぷよで埋まっており、
                 // その範囲内のぷよが全部x0,y0のぷよと同じタイプであり、
                 // その範囲からはみ出ていなければtrue
+                // 高さか幅が1ならパス　通すとdeletePuyosが変化してしまう
                 bool CheckInRange(int x0, int y0, int x1, int y1, ref List<Vector2Int> deletePuyos)
                 {
+                    if (x0 == x1 || y0 == y1) { return false; }
                     PuyoType type = _origins[x0, y0].PuyoType;
                     List<Vector2Int> origins = new List<Vector2Int>();
 
