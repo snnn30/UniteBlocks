@@ -12,13 +12,14 @@ public class BoardController : MonoBehaviour
     const int BOARD_WIDTH = 6;
     const int BOARD_HEIGHT = 14;
     public static readonly Vector2Int START_POS = new Vector2Int(2, 12);
-    public static readonly int MAX_HEIGHT = 11;
+    // public static readonly int MAX_HEIGHT = 11;
     Vector2Int?[,] _coord = new Vector2Int?[BOARD_WIDTH, BOARD_HEIGHT];
     PuyoController[,] _origins = new PuyoController[BOARD_WIDTH, BOARD_HEIGHT];
 
     [SerializeField] PuyoController _prefabPuyo;
     [SerializeField] GameObject _puyosContainer;
     [SerializeField] float _dropSpeed = 0.5f;
+    [SerializeField] GameManager _gameManager;
 
     void ClearAll()
     {
@@ -114,8 +115,11 @@ public class BoardController : MonoBehaviour
         _origins[pos.x, pos.y] = null;
     }
 
-
-    public async UniTask DropToBottom()
+    /// <summary>
+    /// ぷよが着地した後の諸々の処理
+    /// </summary>
+    /// <returns>ゲームオーバーしたかどうか</returns>
+    public async UniTask<bool> DropToBottom()
     {
         List<Tween> activeTweens = new List<Tween>();
 
@@ -156,6 +160,15 @@ public class BoardController : MonoBehaviour
         }
 
         Combine();
+
+        return CheckGameOver();
+    }
+
+    bool CheckGameOver()
+    {
+        if (_coord[START_POS.x, START_POS.y] == null) { return false; }
+        _gameManager.OnGameOver();
+        return true;
     }
 
     void Combine()

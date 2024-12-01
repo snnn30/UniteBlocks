@@ -29,6 +29,8 @@ public class PlayerDrop : MonoBehaviour
 
         if (!_state.CanSet(targetPos, _state.Rotation))
         {
+            // Drop()で発生する若干のずれを修正
+            transform.localPosition = new Vector3(_state.Position.x, _state.Position.y, 0);
             await _state.GroundingProcess();
             await StartDrop();
             return;

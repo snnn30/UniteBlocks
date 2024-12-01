@@ -1,10 +1,9 @@
 @startuml hoge
 class BoardController{
     {static} +Vector2Int START_POS
-    {static} +int MAX_HEIGHT
     +bool CanSettle(Vector2Int pos) 
     +bool Settle(Vector2Int pos, PuyoType puyoType)
-    +void DropToBottom()
+    +bool DropToBottom()
 }
 class PuyoController{
     +PuyoType : PuyoType
@@ -38,6 +37,7 @@ class GameManager{
 
 BoardController --> PuyoController
 BoardController ..> PuyoType
+BoardController --> GameManager
 PuyoController --> PuyoCollerTable
 PuyoController --> PuyoType
 PuyoCollerTable --> SerializableDictionary
@@ -51,7 +51,6 @@ PlayerState --> PuyoController
 PlayerState --> BoardController
 PlayerState *- Direction
 PlayerState --> WatingPuyos
-PlayerState =-> GameManager
 WatingPuyos --> PuyoController
 
 

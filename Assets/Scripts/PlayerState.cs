@@ -12,7 +12,6 @@ public class PlayerState : MonoBehaviour
     PuyoController[] _puyoControllers = new PuyoController[2];
     [SerializeField] BoardController _boardController;
     [SerializeField] WaitingPuyos _waitingPuyos;
-    [SerializeField] GameManager _gameManager;
 
     public enum Direction
     {
@@ -41,20 +40,12 @@ public class PlayerState : MonoBehaviour
             await UniTask.Yield();
         }
 
-        var childPos = CalcChildPuyoPos(Position, Rotation);
-        if ((Position.x == BoardController.START_POS.x && Position.y == BoardController.MAX_HEIGHT)
-            || (childPos.x == BoardController.START_POS.x && childPos.y == BoardController.MAX_HEIGHT))
-        {
-            _gameManager.OnGameOver();
-            return;
-        }
-
-        // PlayerDrop.Drop()で発生する若干のずれを修正
-        transform.localPosition = new Vector3(Position.x, Position.y, 0);
-
         _boardController.Settle(Position, _puyoControllers[0]);
         _boardController.Settle(CalcChildPuyoPos(Position, Rotation), _puyoControllers[1]);
-        await _boardController.DropToBottom();
+
+        bool gameOver = await _boardController.DropToBottom();
+        if (gameOver) { return; }
+
         ChangeOperationPuyos();
         IsAcceptingInput = true;
 
