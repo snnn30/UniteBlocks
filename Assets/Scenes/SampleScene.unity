@@ -954,7 +954,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 93f6b75499fb36c418c4ce200440b38b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _moveDelay: 0.12
+  _moveDelay: 0.08
 --- !u!114 &892744481
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -995,7 +995,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _autoDropDelay: 0.48
-  _manualDropDelay: 0.08
+  _manualDropDelay: 0.06
   _stagnationTime: 0.5
 --- !u!1001 &1066481746
 PrefabInstance:
@@ -1145,8 +1145,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _prefabPuyo: {fileID: 2820339082344813231, guid: 5f58a7f727f54fb4380c58b98dc4f7a9, type: 3}
   _puyosContainer: {fileID: 21047126}
-  _dropSpeed: 0.5
   _gameManager: {fileID: 1340963657}
+  _dropSpeed: 0.5
+  _rotateTime: 1.2
 --- !u!1 &1340963655
 GameObject:
   m_ObjectHideFlags: 0

@@ -27,7 +27,7 @@
                     "name": "Fire",
                     "type": "Button",
                     "id": "81a62358-fd73-4f63-b6b4-2ebd558e9dfa",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -802,6 +802,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Swap",
+                    "type": "Button",
+                    "id": "eab122e5-d3a5-4fcd-8ffd-fb9ebbea90c5",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -989,6 +998,28 @@
                     "processors": "",
                     "groups": ";Gamepad",
                     "action": "Drop",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "fde7d849-d66b-45ad-9b7b-09de72aae597",
+                    "path": "<Keyboard>/i",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Swap",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "65e79d71-563a-4352-a4f8-003f640605f7",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Swap",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
