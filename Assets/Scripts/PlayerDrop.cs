@@ -7,106 +7,109 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerDrop : MonoBehaviour
+namespace Player
 {
-    [SerializeField] float _autoDropDelay = 0.48f;
-    [SerializeField] float _manualDropDelay = 0.08f;
-    [SerializeField] float _stagnationTime = 1.0f;
-
-    float _dropDelay;
-    PlayerInput _input;
-    PlayerState _state;
-    CancellationTokenSource _cancellationTokenSource;
-
-
-
-    async UniTask Drop()
+    public class PlayerDrop : MonoBehaviour
     {
-        float moveAmout = Time.deltaTime / _dropDelay;
-        Vector2Int targetPos = new Vector2Int(_state.Position.x, Mathf.FloorToInt(transform.localPosition.y - moveAmout));
+        [SerializeField] float _autoDropDelay = 0.48f;
+        [SerializeField] float _manualDropDelay = 0.08f;
+        [SerializeField] float _stagnationTime = 1.0f;
 
-        if (!_state.IsAcceptingInput) { return; }
+        float _dropDelay;
+        PlayerInput _input;
+        PlayerState _state;
+        CancellationTokenSource _cancellationTokenSource;
 
-        if (!_state.CanSet(targetPos, _state.Rotation))
+
+
+        async UniTask Drop()
         {
-            await _state.GroundingProcess();
-            await StartDrop();
+            float moveAmout = Time.deltaTime / _dropDelay;
+            Vector2Int targetPos = new Vector2Int(_state.Position.x, Mathf.FloorToInt(transform.localPosition.y - moveAmout));
+
+            if (!_state.IsAcceptingInput) { return; }
+
+            if (!_state.CanSet(targetPos, _state.Rotation))
+            {
+                await _state.GroundingProcess();
+                await StartDrop();
+                return;
+            }
+
+            transform.localPosition -= new Vector3(0, moveAmout, 0);
+            if (transform.localPosition.y < _state.Position.y)
+            {
+                _state.Position = targetPos;
+            }
+
             return;
         }
 
-        transform.localPosition -= new Vector3(0, moveAmout, 0);
-        if (transform.localPosition.y < _state.Position.y)
+        void OnDropPerformed(InputAction.CallbackContext context)
         {
-            _state.Position = targetPos;
+            _dropDelay = _manualDropDelay;
         }
 
-        return;
-    }
-
-    void OnDropPerformed(InputAction.CallbackContext context)
-    {
-        _dropDelay = _manualDropDelay;
-    }
-
-    void OnDropCanceled(InputAction.CallbackContext context)
-    {
-        _dropDelay = _autoDropDelay;
-    }
-
-
-    private void Awake()
-    {
-        _input = GetComponent<PlayerInput>();
-        _state = GetComponent<PlayerState>();
-        _dropDelay = _autoDropDelay;
-    }
-
-    async UniTask StartDrop()
-    {
-        if (_cancellationTokenSource != null)
+        void OnDropCanceled(InputAction.CallbackContext context)
         {
-            _cancellationTokenSource.Cancel();
-            _cancellationTokenSource.Dispose();
-            _cancellationTokenSource = null;
+            _dropDelay = _autoDropDelay;
         }
-        _cancellationTokenSource = new CancellationTokenSource();
-        await UniTask.WaitForSeconds(_stagnationTime, cancellationToken: _cancellationTokenSource.Token);
 
-        DropContinuous(_cancellationTokenSource.Token).Forget();
-        async UniTask DropContinuous(CancellationToken token)
+
+        private void Awake()
         {
-            while (true)
+            _input = GetComponent<PlayerInput>();
+            _state = GetComponent<PlayerState>();
+            _dropDelay = _autoDropDelay;
+        }
+
+        async UniTask StartDrop()
+        {
+            if (_cancellationTokenSource != null)
             {
-                await Drop();
-                await UniTask.Yield(cancellationToken: token);
+                _cancellationTokenSource.Cancel();
+                _cancellationTokenSource.Dispose();
+                _cancellationTokenSource = null;
+            }
+            _cancellationTokenSource = new CancellationTokenSource();
+            await UniTask.WaitForSeconds(_stagnationTime, cancellationToken: _cancellationTokenSource.Token);
+
+            DropContinuous(_cancellationTokenSource.Token).Forget();
+            async UniTask DropContinuous(CancellationToken token)
+            {
+                while (true)
+                {
+                    await Drop();
+                    await UniTask.Yield(cancellationToken: token);
+                }
             }
         }
-    }
 
-    private void Start()
-    {
-        StartDrop().Forget();
-    }
-
-    private void OnDestroy()
-    {
-        if (_cancellationTokenSource != null)
+        private void Start()
         {
-            _cancellationTokenSource.Cancel();
-            _cancellationTokenSource.Dispose();
-            _cancellationTokenSource = null;
+            StartDrop().Forget();
         }
-    }
 
-    private void OnEnable()
-    {
-        _input.actions["Drop"].performed += OnDropPerformed;
-        _input.actions["Drop"].canceled += OnDropCanceled;
-    }
+        private void OnDestroy()
+        {
+            if (_cancellationTokenSource != null)
+            {
+                _cancellationTokenSource.Cancel();
+                _cancellationTokenSource.Dispose();
+                _cancellationTokenSource = null;
+            }
+        }
 
-    private void OnDisable()
-    {
-        _input.actions["Drop"].performed -= OnDropPerformed;
-        _input.actions["Drop"].canceled -= OnDropCanceled;
+        private void OnEnable()
+        {
+            _input.actions["Drop"].performed += OnDropPerformed;
+            _input.actions["Drop"].canceled += OnDropCanceled;
+        }
+
+        private void OnDisable()
+        {
+            _input.actions["Drop"].performed -= OnDropPerformed;
+            _input.actions["Drop"].canceled -= OnDropCanceled;
+        }
     }
 }

@@ -1,57 +1,81 @@
 @startuml hoge
-class BoardController{
-    {static} +Vector2Int START_POS
-    +bool CanSettle(Vector2Int pos) 
-    +bool Settle(Vector2Int pos, PuyoType puyoType)
-    +bool DropToBottom()
-}
-class PuyoController{
-    +PuyoType : PuyoType
-}
-class PuyoCollerTable{
-    +SerializableDictionary<PuyoType, Color> PuyoColooers
-}
-class SerializableDictionary
-enum PuyoType
 
-class PlayerRotate
-class PlayerMove
-class PlayerDrop
-class PlayerState{
-    +Vector2Int Position
-    +Direction Rotation    
-    +bool IsAcceptingInput
-    +List<Tween> ActiveTweens
-    +PuyoController[] PuyoControllers
-    +void GroundingProcess()
-    +bool CanSet(Vector2Int pos, Directoin rot)
-}
-enum Direction
-class WatingPuyos{
-    +PuyoController[] GetNextPuyos()
+namespace Player{
+    class PlayerRotate
+    class PlayerMove
+    class PlayerDrop
+    class PlayerState{
+        +Vector2Int Position
+        +Direction Rotation    
+        +bool IsAcceptingInput
+        +List<Tween> ActiveTweens
+        +Item[] Items
+        +bool IsBomb
+        +void GroundingProcess()
+        +bool CanSet(Vector2Int pos, Directoin rot)
+    }
+    enum Direction
+
+    PlayerDrop --> PlayerState
+    PlayerRotate --> PlayerState
+    PlayerMove --> PlayerState
+    PlayerRotate ..> Direction
+    PlayerState *- Direction
 }
 
-class GameManager{
-    +void OnGameOver()
+namespace Items{
+    interface Item
+    class Bomb
+    class Puyo{
+        +PuyoType : PuyoType
+    }
+    class PuyoCollerTable{
+        +SerializableDictionary<PuyoType, Color> PuyoColooers
+    }
+    enum PuyoType
+
+    Item <|-- Puyo
+    Item <|-- Bomb
+    Puyo --> PuyoCollerTable
+    Puyo --> PuyoType
+    PuyoCollerTable --> PuyoType
 }
 
-BoardController --> PuyoController
-BoardController ..> PuyoType
-BoardController --> GameManager
-PuyoController --> PuyoCollerTable
-PuyoController --> PuyoType
+namespace Utility{
+    class SerializableDictionary
+}
+
+namespace Manager{
+    class GameManager{
+        +void OnGameOver()
+    }
+}
+
+
+namespace Board{
+    class WatingPuyos{
+        +(Item[] items, bool isBomb) GetNextPuyos()
+    }
+
+    class BoardController{
+        {static} +Vector2Int START_POS
+        +bool CanSettle(Vector2Int pos) 
+        +bool Settle(Vector2Int pos, PuyoType puyoType)
+        +bool DropToBottom()
+    }
+}
+
+
+
 PuyoCollerTable --> SerializableDictionary
-PuyoCollerTable --> PuyoType
 
-PlayerDrop --> PlayerState
-PlayerRotate --> PlayerState
-PlayerMove --> PlayerState
-
-PlayerState --> PuyoController
+PlayerState --> Item
 PlayerState --> BoardController
-PlayerState *- Direction
 PlayerState --> WatingPuyos
-WatingPuyos --> PuyoController
+
+WatingPuyos --> Item
+BoardController --> Puyo
+BoardController --> GameManager
 
 
 @enduml

@@ -6,43 +6,46 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-[Serializable]
-public class SerializableDictionary<TKey, TValue> :
-    Dictionary<TKey, TValue>,
-    ISerializationCallbackReceiver
+namespace Utility
 {
     [Serializable]
-    public class Pair
+    public class SerializableDictionary<TKey, TValue> :
+        Dictionary<TKey, TValue>,
+        ISerializationCallbackReceiver
     {
-        public TKey key = default;
-        public TValue value = default;
-
-
-        public Pair(TKey key, TValue value)
+        [Serializable]
+        public class Pair
         {
-            this.key = key;
-            this.value = value;
-        }
-    }
+            public TKey key = default;
+            public TValue value = default;
 
-    [SerializeField]
-    private List<Pair> _list = null;
 
-    void ISerializationCallbackReceiver.OnAfterDeserialize()
-    {
-        Clear();
-        foreach (Pair pair in _list)
-        {
-            if (ContainsKey(pair.key))
+            public Pair(TKey key, TValue value)
             {
-                continue;
+                this.key = key;
+                this.value = value;
             }
-            Add(pair.key, pair.value);
         }
-    }
 
-    void ISerializationCallbackReceiver.OnBeforeSerialize()
-    {
-        // 処理なし
+        [SerializeField]
+        private List<Pair> _list = null;
+
+        void ISerializationCallbackReceiver.OnAfterDeserialize()
+        {
+            Clear();
+            foreach (Pair pair in _list)
+            {
+                if (ContainsKey(pair.key))
+                {
+                    continue;
+                }
+                Add(pair.key, pair.value);
+            }
+        }
+
+        void ISerializationCallbackReceiver.OnBeforeSerialize()
+        {
+            // 処理なし
+        }
     }
 }

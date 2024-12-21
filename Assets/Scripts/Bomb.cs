@@ -4,7 +4,10 @@
 
 using UnityEngine;
 
-public class Bomb : MonoBehaviour, Item
+namespace Items
 {
+    public class Bomb : MonoBehaviour, Item
+    {
 
+    }
 }

@@ -8,55 +8,59 @@ using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class GameManager : MonoBehaviour
+
+namespace Manager
 {
-    [SerializeField] Image _startImage;
-
-    InputAction _anyKeyAction;
-
-    private void Awake()
+    public class GameManager : MonoBehaviour
     {
-        _startImage.gameObject.SetActive(true);
-        Time.timeScale = 0;
+        [SerializeField] Image _startImage;
 
-        _anyKeyAction = new InputAction(
-            "AnyKey",
-            InputActionType.Button,
-            "<Keyboard>/anyKey"
-            );
+        InputAction _anyKeyAction;
 
-        _anyKeyAction.performed += OnAnyKey;
+        private void Awake()
+        {
+            _startImage.gameObject.SetActive(true);
+            Time.timeScale = 0;
+
+            _anyKeyAction = new InputAction(
+                "AnyKey",
+                InputActionType.Button,
+                "<Keyboard>/anyKey"
+                );
+
+            _anyKeyAction.performed += OnAnyKey;
+        }
+
+        private void OnDestroy()
+        {
+            _anyKeyAction.performed -= OnAnyKey;
+            _anyKeyAction.Dispose();
+        }
+
+        private async void OnEnable()
+        {
+            // リスタート時の誤操作を防ぐ
+            await UniTask.WaitForSeconds(1f, ignoreTimeScale: true);
+            _anyKeyAction.Enable();
+        }
+
+        private void OnDisable()
+        {
+            _anyKeyAction.Disable();
+        }
+
+        void OnAnyKey(InputAction.CallbackContext context)
+        {
+            _startImage.gameObject.SetActive(false);
+            Time.timeScale = 1;
+            _anyKeyAction.Disable();
+        }
+
+        public void OnGameOver()
+        {
+            Time.timeScale = 0;
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+
     }
-
-    private void OnDestroy()
-    {
-        _anyKeyAction.performed -= OnAnyKey;
-        _anyKeyAction.Dispose();
-    }
-
-    private async void OnEnable()
-    {
-        // リスタート時の誤操作を防ぐ
-        await UniTask.WaitForSeconds(1f, ignoreTimeScale: true);
-        _anyKeyAction.Enable();
-    }
-
-    private void OnDisable()
-    {
-        _anyKeyAction.Disable();
-    }
-
-    void OnAnyKey(InputAction.CallbackContext context)
-    {
-        _startImage.gameObject.SetActive(false);
-        Time.timeScale = 1;
-        _anyKeyAction.Disable();
-    }
-
-    public void OnGameOver()
-    {
-        Time.timeScale = 0;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-    }
-
 }

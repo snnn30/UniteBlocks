@@ -468,7 +468,7 @@ GameObject:
   - component: {fileID: 564983538}
   - component: {fileID: 564983539}
   m_Layer: 0
-  m_Name: WaitingPuyos
+  m_Name: WaitingItems
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -504,6 +504,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _prefabPuyo: {fileID: 2820339082344813231, guid: 5f58a7f727f54fb4380c58b98dc4f7a9, type: 3}
+  _prefabBomb: {fileID: 5746298605155181709, guid: 16f245c65a60132479d9995502a37469, type: 3}
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -981,7 +982,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _boardController: {fileID: 1262082768}
-  _waitingPuyos: {fileID: 564983539}
+  _waitingItems: {fileID: 564983539}
 --- !u!114 &892744483
 MonoBehaviour:
   m_ObjectHideFlags: 0
