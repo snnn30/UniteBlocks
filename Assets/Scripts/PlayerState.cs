@@ -9,9 +9,10 @@ using UnityEngine;
 
 public class PlayerState : MonoBehaviour
 {
-    PuyoController[] _puyoControllers = new PuyoController[2];
+    Item[] _items = new Item[2];
+    bool _isBomb;
     [SerializeField] BoardController _boardController;
-    [SerializeField] WaitingPuyos _waitingPuyos;
+    [SerializeField] WaitingItems _waitingItems;
 
     public enum Direction
     {
@@ -30,7 +31,8 @@ public class PlayerState : MonoBehaviour
     public Direction Rotation { get; set; }
     public bool IsAcceptingInput { get; private set; } = true;
     public List<Tween> ActiveTweens { get; set; } = new List<Tween>();
-    public PuyoController[] PuyoControllers => _puyoControllers;
+    public Item[] Items => _items;
+    public bool IsBomb => _isBomb;
 
     public async UniTask GroundingProcess()
     {
@@ -43,8 +45,10 @@ public class PlayerState : MonoBehaviour
         // Drop()で発生する若干のずれを修正
         transform.localPosition = new Vector3(Position.x, Position.y, 0);
 
-        _boardController.Settle(Position, _puyoControllers[0]);
-        _boardController.Settle(CalcChildPuyoPos(Position, Rotation), _puyoControllers[1]);
+        if (IsBomb) { return; }
+
+        _boardController.Settle(Position, (Puyo)_items[0]);
+        _boardController.Settle(CalcChildPuyoPos(Position, Rotation), (Puyo)_items[1]);
 
         bool gameOver = await _boardController.DropToBottom();
         if (gameOver) { return; }
@@ -58,6 +62,7 @@ public class PlayerState : MonoBehaviour
     public bool CanSet(Vector2Int pos, Direction rot)
     {
         if (!_boardController.CanSettle(pos)) { return false; }
+        if (IsBomb) { return true; }
         if (!_boardController.CanSettle(CalcChildPuyoPos(pos, rot))) { return false; }
         return true;
     }
@@ -74,11 +79,22 @@ public class PlayerState : MonoBehaviour
         Position = initialPos;
         this.transform.localPosition = new Vector3(Position.x, Position.y, 0);
 
-        _puyoControllers = _waitingPuyos.GetNextPuyos();
-        _puyoControllers[0].transform.position = this.transform.position;
-        _puyoControllers[1].transform.position = this.transform.position + Vector3.up;
-        _puyoControllers[0].transform.parent = this.transform;
-        _puyoControllers[1].transform.parent = this.transform;
+        (_items, _isBomb) = _waitingItems.GetNextItems();
+        if (_isBomb)
+        {
+            Bomb bomb = ((Bomb)_items[0]);
+            bomb.transform.position = this.transform.position;
+            bomb.transform.parent = this.transform;
+        }
+        else
+        {
+            Puyo parent = (Puyo)_items[0];
+            Puyo child = (Puyo)_items[1];
+            parent.transform.position = this.transform.position;
+            child.transform.position = this.transform.position + Vector3.up;
+            parent.transform.parent = this.transform;
+            child.transform.parent = this.transform;
+        }
     }
 
 

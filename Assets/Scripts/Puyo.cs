@@ -7,7 +7,7 @@ using UnityEngine;
 
 
 [RequireComponent(typeof(SpriteRenderer))]
-public class PuyoController : MonoBehaviour
+public class Puyo : MonoBehaviour, Item
 {
     [SerializeField] PuyoColorTable _puyoColorTable;
 

@@ -14,9 +14,9 @@ public class BoardController : MonoBehaviour
     public static readonly Vector2Int START_POS = new Vector2Int(2, 12);
     // public static readonly int MAX_HEIGHT = 11;
     Vector2Int?[,] _coord = new Vector2Int?[BOARD_WIDTH, BOARD_HEIGHT];
-    PuyoController[,] _origins = new PuyoController[BOARD_WIDTH, BOARD_HEIGHT];
+    Puyo[,] _origins = new Puyo[BOARD_WIDTH, BOARD_HEIGHT];
 
-    [SerializeField] PuyoController _prefabPuyo;
+    [SerializeField] Puyo _prefabPuyo;
     [SerializeField] GameObject _puyosContainer;
     [SerializeField] GameManager _gameManager;
     [SerializeField] float _dropSpeed = 0.5f;
@@ -50,7 +50,7 @@ public class BoardController : MonoBehaviour
     /// <summary>
     /// アイテムがおけるかを検証
     /// </summary>
-    public bool CanSettle(Vector2Int pos, PuyoController puyo)
+    public bool CanSettle(Vector2Int pos, Puyo puyo)
     {
         for (int x = pos.x; x < pos.x + puyo.Shape.x; x++)
         {
@@ -73,7 +73,7 @@ public class BoardController : MonoBehaviour
     /// <summary>
     /// アイテムを置く
     /// </summary>
-    public void Settle(Vector2Int pos, PuyoController puyo)
+    public void Settle(Vector2Int pos, Puyo puyo)
     {
         if (!CanSettle(pos, puyo))
         {
@@ -258,7 +258,7 @@ public class BoardController : MonoBehaviour
 
                     foreach (Vector2Int pos in origins)
                     {
-                        PuyoController target = _origins[pos.x, pos.y];
+                        Puyo target = _origins[pos.x, pos.y];
                         if (target.PuyoType != type) { return false; }
                         if (pos.x < x0 || pos.y < y0) { return false; }
                         if (pos.x + target.Shape.x - 1 > x1 || pos.y + target.Shape.y - 1 > y1) { return false; }

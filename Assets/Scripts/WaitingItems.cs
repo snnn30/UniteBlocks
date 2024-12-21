@@ -4,21 +4,35 @@
 
 using UnityEngine;
 
-public class WaitingPuyos : MonoBehaviour
+public class WaitingItems : MonoBehaviour
 {
-    PuyoController[] _puyoControllers = new PuyoController[2];
-    [SerializeField] PuyoController _prefabPuyo;
+    Puyo[] _puyos = new Puyo[2];
+    Bomb _bomb;
+    bool _isBomb = false;
+    [SerializeField] Puyo _prefabPuyo;
+    [SerializeField] Bomb _prefabBomb;
 
-    public PuyoController[] GetNextPuyos()
+
+
+    public (Item[] items, bool _isBomb) GetNextItems()
     {
-        PuyoController[] returnPuyos = _puyoControllers;
-        _puyoControllers = GeneratePuyos();
-        return returnPuyos;
+        if (_isBomb)
+        {
+            Item[] items = { _bomb, null };
+            _bomb = GenerateBomb();
+            return (items, _isBomb);
+        }
+        else
+        {
+            Item[] items = _puyos;
+            _puyos = GeneratePuyos();
+            return (items, _isBomb);
+        }
     }
 
-    PuyoController[] GeneratePuyos()
+    Puyo[] GeneratePuyos()
     {
-        PuyoController[] returnPuyos = new PuyoController[2];
+        Puyo[] returnPuyos = new Puyo[2];
 
         returnPuyos[0] = Instantiate(_prefabPuyo, transform);
         returnPuyos[1] = Instantiate(_prefabPuyo, transform);
@@ -31,6 +45,12 @@ public class WaitingPuyos : MonoBehaviour
         return returnPuyos;
     }
 
+    Bomb GenerateBomb()
+    {
+        Bomb returnBomb = Instantiate(_prefabBomb, transform);
+        return returnBomb;
+    }
+
     private void Awake()
     {
         foreach (Transform n in this.transform)
@@ -38,7 +58,8 @@ public class WaitingPuyos : MonoBehaviour
             GameObject.Destroy(n.gameObject);
         }
 
-        _puyoControllers = GeneratePuyos();
+        _puyos = GeneratePuyos();
+        _bomb = GenerateBomb();
     }
 
 }

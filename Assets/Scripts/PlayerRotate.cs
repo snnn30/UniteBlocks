@@ -21,6 +21,8 @@ public class PlayerRotate : MonoBehaviour
 
     void Rotate(float value)
     {
+        if (_state.IsBomb) { return; }
+
         var isRight = (value < 0) ? false : true;
         Direction targetRot;
         float targetAmount;
@@ -40,8 +42,8 @@ public class PlayerRotate : MonoBehaviour
         if (!_state.CanSet(_state.Position, targetRot)) { return; }
 
         float currentAngle = 0;
-        var parentPuyo = _state.PuyoControllers[0];
-        var childPuyo = _state.PuyoControllers[1];
+        var parentPuyo = (Puyo)_state.Items[0];
+        var childPuyo = (Puyo)_state.Items[1];
 
         var tween = DOTween.To(
             () => 0f,
