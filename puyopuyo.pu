@@ -53,8 +53,14 @@ namespace Manager{
 
 
 namespace Board{
-    class WatingPuyos{
+    class WaitingBomb{
+        +bool IsActive
+        +int Count
+    }
+
+    class WatingItems{
         +(Item[] items, bool isBomb) GetNextPuyos()
+        +void IncrementBombCount()
     }
 
     class BoardController{
@@ -63,6 +69,8 @@ namespace Board{
         +bool Settle(Vector2Int pos, PuyoType puyoType)
         +bool DropToBottom()
     }
+
+    WaitingBomb <- WatingItems 
 }
 
 
@@ -71,9 +79,9 @@ PuyoCollerTable --> SerializableDictionary
 
 PlayerState --> Item
 PlayerState --> BoardController
-PlayerState --> WatingPuyos
+PlayerState --> WatingItems
 
-WatingPuyos --> Item
+WatingItems --> Item
 BoardController --> Puyo
 BoardController --> GameManager
 

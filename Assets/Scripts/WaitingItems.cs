@@ -10,27 +10,33 @@ namespace Board
     public class WaitingItems : MonoBehaviour
     {
         Puyo[] _puyos = new Puyo[2];
-        Bomb _bomb;
-        bool _isBomb = false;
         [SerializeField] Puyo _prefabPuyo;
         [SerializeField] Bomb _prefabBomb;
+        [SerializeField] WaitingBomb _waitingBomb;
+
 
 
 
         public (Item[] items, bool _isBomb) GetNextItems()
         {
-            if (_isBomb)
+            if (_waitingBomb.IsActive)
             {
-                Item[] items = { _bomb, null };
-                _bomb = GenerateBomb();
-                return (items, _isBomb);
+                Bomb bomb = GenerateBomb();
+                Item[] items = { bomb, null };
+                _waitingBomb.Count = 0;
+                return (items, true);
             }
             else
             {
                 Item[] items = _puyos;
                 _puyos = GeneratePuyos();
-                return (items, _isBomb);
+                return (items, false);
             }
+        }
+
+        public void IncrementBombCount()
+        {
+            _waitingBomb.Count++;
         }
 
         Puyo[] GeneratePuyos()
@@ -62,7 +68,6 @@ namespace Board
             }
 
             _puyos = GeneratePuyos();
-            _bomb = GenerateBomb();
         }
 
     }

@@ -49,8 +49,16 @@ namespace Player
             // Drop()で発生する若干のずれを修正
             transform.localPosition = new Vector3(Position.x, Position.y, 0);
 
-            if (IsBomb) { return; }
+            if (IsBomb)
+            {
+                Destroy(((Bomb)_items[0]).gameObject);
+                _items[0] = null;
+                ChangeOperationPuyos();
+                IsAcceptingInput = true;
+                return;
+            }
 
+            _waitingItems.IncrementBombCount();
             _boardController.Settle(Position, (Puyo)_items[0]);
             _boardController.Settle(CalcChildPuyoPos(Position, Rotation), (Puyo)_items[1]);
 
