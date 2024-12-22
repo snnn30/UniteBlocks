@@ -25,7 +25,8 @@ namespace Board
         [SerializeField] GameManager _gameManager;
         [SerializeField] float _dropSpeed = 0.5f;
         [SerializeField] float _rotateTime = 1;
-
+        [SerializeField] float _dissolveTime = 0.1f;
+        [SerializeField] float _propagationTime = 0.08f;
 
         void ClearAll()
         {
@@ -283,5 +284,118 @@ namespace Board
             }
         }
 
+
+        // posはBombが置かれた位置
+        public async UniTask Explode(Vector2Int pos)
+        {
+            pos += Vector2Int.down;
+            if (!IsValid(pos)) { return; }
+            if (_coord[pos.x, pos.y] == null) { return; }
+
+            Vector2Int origin = (Vector2Int)_coord[pos.x, pos.y];
+            PuyoType type = _origins[origin.x, origin.y].PuyoType;
+
+            List<List<Vector2Int>> origins = new List<List<Vector2Int>>();
+            origins.Add(new List<Vector2Int> { origin });
+
+            while (true)
+            {
+                var latestList = origins[origins.Count - 1];
+                List<Vector2Int> addList = new List<Vector2Int>();
+
+                foreach (var latest in latestList)
+                {
+                    GetNextExplosionTargets(latest);
+                }
+                void GetNextExplosionTargets(Vector2Int origin)
+                {
+                    List<Vector2Int> inspectionPositions = GetTouchingPuyo(origin);
+
+                    foreach (var target in inspectionPositions)
+                    {
+                        if (!IsValid(target)) { continue; }
+                        if (_coord[target.x, target.y] == null) { continue; }
+                        Vector2Int targetOrigin = (Vector2Int)_coord[target.x, target.y];
+
+                        if (_origins[targetOrigin.x, targetOrigin.y].PuyoType != type) continue;
+                        bool isContinue = false;
+                        foreach (var list in origins)
+                        {
+                            if (list.Contains(targetOrigin))
+                            {
+                                isContinue = true;
+                                break;
+                            }
+                        }
+                        if (isContinue) { continue; }
+                        if (addList.Contains(targetOrigin)) { continue; }
+
+                        addList.Add(targetOrigin);
+                    }
+                }
+
+                if (addList.Count == 0) { break; }
+                origins.Add(addList);
+            }
+
+
+            List<Tween> activeTweens = new List<Tween>();
+            foreach (var list in origins)
+            {
+                foreach (var target in list)
+                {
+                    /*
+                    if (_origins[target.x, target.y].Shape.x != 1 ||
+                        _origins[target.x, target.y].Shape.y != 1)
+                    {
+                    }
+                    */
+                    var tween = _origins[target.x, target.y].transform
+                        .DOScale(0, _dissolveTime)
+                        .SetEase(Ease.OutExpo);
+                    activeTweens.Add(tween);
+                    tween.OnKill(() =>
+                    {
+                        activeTweens.Remove(tween);
+                        Destroy(_origins[target.x, target.y].gameObject);
+                        Delete(target);
+                    });
+
+                }
+                await UniTask.WaitForSeconds(_propagationTime);
+            }
+
+            while (activeTweens.Count != 0)
+            {
+                await UniTask.Yield();
+            }
+            await DropToBottom();
+        }
+
+        // 斜めは含まない
+        List<Vector2Int> GetTouchingPuyo(Vector2Int origin)
+        {
+            List<Vector2Int> outList = new List<Vector2Int>();
+            Puyo puyo = _origins[origin.x, origin.y];
+
+            for (int i = origin.x - 1; i < origin.x + puyo.Shape.x + 1; i++)
+            {
+                for (int j = origin.y - 1; j < origin.y + puyo.Shape.y + 1; j++)
+                {
+                    if (!IsValid(new Vector2Int(i, j))) { continue; }
+                    if (_coord[i, j] == null) { continue; }
+                    if (i == origin.x - 1 && j == origin.y - 1 ||
+                        i == origin.x - 1 && j == origin.y + puyo.Shape.y ||
+                        i == origin.x + puyo.Shape.x && j == origin.y - 1 ||
+                        i == origin.x + puyo.Shape.x && j == origin.y + puyo.Shape.y) { continue; }
+                    if (outList.Contains((Vector2Int)_coord[i, j])) { continue; }
+                    outList.Add((Vector2Int)_coord[i, j]);
+                }
+            }
+
+            return outList;
+        }
     }
+
+
 }

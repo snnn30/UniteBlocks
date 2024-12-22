@@ -60,7 +60,6 @@ namespace Board{
 
     class WatingItems{
         +(Item[] items, bool isBomb) GetNextPuyos()
-        +void IncrementBombCount()
     }
 
     class BoardController{

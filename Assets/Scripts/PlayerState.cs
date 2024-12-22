@@ -52,13 +52,13 @@ namespace Player
             if (IsBomb)
             {
                 Destroy(((Bomb)_items[0]).gameObject);
+                await _boardController.Explode(Position);
                 _items[0] = null;
                 ChangeOperationPuyos();
                 IsAcceptingInput = true;
                 return;
             }
 
-            _waitingItems.IncrementBombCount();
             _boardController.Settle(Position, (Puyo)_items[0]);
             _boardController.Settle(CalcChildPuyoPos(Position, Rotation), (Puyo)_items[1]);
 
