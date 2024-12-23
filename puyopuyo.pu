@@ -67,6 +67,7 @@ namespace Board{
         +bool CanSettle(Vector2Int pos) 
         +bool Settle(Vector2Int pos, PuyoType puyoType)
         +bool DropToBottom()
+        +void Explode(Vector2Int pos)
     }
 
     WaitingBomb <- WatingItems 
