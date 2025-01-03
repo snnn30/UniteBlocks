@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -15,50 +16,55 @@ namespace Manager
     {
         [SerializeField] Image _startImage;
 
-        InputAction _anyKeyAction;
-
-        private void Awake()
-        {
-            _startImage.gameObject.SetActive(true);
-            Time.timeScale = 0;
-
-            _anyKeyAction = new InputAction(
+        Image StartImage => _startImage;
+        InputAction AnyKeyAction { get; } = new InputAction(
                 "AnyKey",
                 InputActionType.Button,
                 "<Keyboard>/anyKey"
                 );
 
-            _anyKeyAction.performed += OnAnyKey;
+
+
+        private void Awake()
+        {
+            StartImage.gameObject.SetActive(true);
+            Time.timeScale = 0;
+
+
+            AnyKeyAction.performed += OnAnyKey;
         }
 
         private void OnDestroy()
         {
-            _anyKeyAction.performed -= OnAnyKey;
-            _anyKeyAction.Dispose();
+            AnyKeyAction.performed -= OnAnyKey;
+            AnyKeyAction.Dispose();
         }
 
         private async void OnEnable()
         {
             // リスタート時の誤操作を防ぐ
             await UniTask.WaitForSeconds(1f, ignoreTimeScale: true);
-            _anyKeyAction.Enable();
+            AnyKeyAction.Enable();
         }
 
         private void OnDisable()
         {
-            _anyKeyAction.Disable();
+            AnyKeyAction.Disable();
         }
 
         void OnAnyKey(InputAction.CallbackContext context)
         {
-            _startImage.gameObject.SetActive(false);
+            StartImage.gameObject.SetActive(false);
             Time.timeScale = 1;
-            _anyKeyAction.Disable();
+            AnyKeyAction.Disable();
         }
+
+
 
         public void OnGameOver()
         {
             Time.timeScale = 0;
+            DOTween.KillAll();
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
 

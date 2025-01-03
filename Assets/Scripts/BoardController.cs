@@ -7,6 +7,7 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Items;
 using Manager;
+using Score;
 using UnityEngine;
 
 namespace Board
@@ -15,6 +16,7 @@ namespace Board
     {
         const int BOARD_WIDTH = 6;
         const int BOARD_HEIGHT = 14;
+        const uint POINT = 100;
         public static readonly Vector2Int START_POS = new Vector2Int(2, 12);
         // public static readonly int MAX_HEIGHT = 11;
         Vector2Int?[,] _coord = new Vector2Int?[BOARD_WIDTH, BOARD_HEIGHT];
@@ -23,10 +25,10 @@ namespace Board
         [SerializeField] Puyo _prefabPuyo;
         [SerializeField] GameObject _puyosContainer;
         [SerializeField] GameManager _gameManager;
+        [SerializeField] ScoreManager _scoreManager;
         [SerializeField] float _dropSpeed = 0.5f;
         [SerializeField] float _rotateTime = 1;
         [SerializeField] float _dissolveTime = 0.1f;
-        [SerializeField] float _propagationTime = 0.08f;
 
         void ClearAll()
         {
@@ -157,7 +159,7 @@ namespace Board
                         .DOLocalMoveY(targetHeight, _dropSpeed)
                         .SetEase(Ease.OutBounce);
                     activeTweens.Add(tween);
-                    tween.OnKill(() => activeTweens.Remove(tween));
+                    _ = tween.OnKill(() => activeTweens.Remove(tween));
                 }
             }
 
@@ -236,7 +238,7 @@ namespace Board
                         _rotateTime
                         ).SetEase(Ease.OutBack);
                     tweens.Add(tween);
-                    tween.OnKill(() => tweens.Remove(tween));
+                    _ = tween.OnKill(() => tweens.Remove(tween));
 
 
 
@@ -338,23 +340,27 @@ namespace Board
                 origins.Add(addList);
             }
 
-
+            _scoreManager.SetVisible(true);
             List<Tween> activeTweens = new List<Tween>();
             foreach (var list in origins)
             {
+                uint points = 0;
+                uint multiplier = 0;
                 foreach (var target in list)
                 {
-                    /*
-                    if (_origins[target.x, target.y].Shape.x != 1 ||
-                        _origins[target.x, target.y].Shape.y != 1)
+                    var width = _origins[target.x, target.y].Shape.x;
+                    var height = _origins[target.x, target.y].Shape.y;
+                    points += POINT * (uint)width * (uint)height;
+                    if (width != 1 || height != 1)
                     {
+                        multiplier += (uint)width * (uint)height;
                     }
-                    */
+
                     var tween = _origins[target.x, target.y].transform
                         .DOScale(0, _dissolveTime)
                         .SetEase(Ease.OutExpo);
                     activeTweens.Add(tween);
-                    tween.OnKill(() =>
+                    _ = tween.OnKill(() =>
                     {
                         activeTweens.Remove(tween);
                         Destroy(_origins[target.x, target.y].gameObject);
@@ -362,14 +368,22 @@ namespace Board
                     });
 
                 }
-                await UniTask.WaitForSeconds(_propagationTime);
+                await _scoreManager.AddScoreAddition(points);
+                await _scoreManager.AddScoreMultiplication(multiplier);
             }
+
+            await UniTask.WaitForSeconds(0.08f);
 
             while (activeTweens.Count != 0)
             {
                 await UniTask.Yield();
             }
             await DropToBottom();
+
+            await _scoreManager.ResolveMultiplication();
+            await UniTask.WaitForSeconds(0.08f);
+            await _scoreManager.ResolveAddition();
+            _scoreManager.SetVisible(false);
         }
 
         // 斜めは含まない

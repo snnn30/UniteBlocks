@@ -73,6 +73,23 @@ namespace Board{
     WaitingBomb <- WatingItems 
 }
 
+namespace Score{
+    class ScoreData{
+        +uint Value
+        +void SetVisible(bool visible)
+        +Unitask SetValue(uint targetValue, float seconds, float scale)
+    }
+    class ScoreManager{
+        +Unitask AddScoreAddition(value)
+        +Unitask AddScoreMultiplication(value)
+        +void SetVisible(bool visible)
+        +Unitask ResolveAddition()
+        +Unitask ResolveMultiplication()
+    }
+
+    ScoreManager -> ScoreData
+}
+
 
 
 PuyoCollerTable --> SerializableDictionary
@@ -84,6 +101,6 @@ PlayerState --> WatingItems
 WatingItems --> Item
 BoardController --> Puyo
 BoardController --> GameManager
-
+BoardController -> ScoreManager
 
 @enduml
