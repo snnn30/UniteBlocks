@@ -14,12 +14,10 @@ namespace Player
 {
     public class PlayerRotate : MonoBehaviour
     {
-        [SerializeField] float _rotateDelay = 0.12f;
-
         PlayerInput _input;
         PlayerState _state;
         CancellationTokenSource _cancellationTokenSource;
-
+        PlayerSetting _setting;
 
         void Rotate(float value)
         {
@@ -59,7 +57,7 @@ namespace Player
                     currentAngle = x;
                 },
                 targetAmount,
-                _rotateDelay
+                _setting.RotateDelay
                 ).SetEase(Ease.OutQuad);
 
             _state.ActiveTweens.Add(tween);
@@ -83,7 +81,7 @@ namespace Player
                 while (true)
                 {
                     Rotate(context.ReadValue<float>());
-                    await UniTask.Delay(TimeSpan.FromSeconds(_rotateDelay), cancellationToken: token);
+                    await UniTask.Delay(TimeSpan.FromSeconds(_setting.RotateDelay), cancellationToken: token);
                 }
             }
         }
@@ -113,6 +111,7 @@ namespace Player
         {
             _input = GetComponent<PlayerInput>();
             _state = GetComponent<PlayerState>();
+            _setting = _state.PlayerSetting;
         }
 
         private void OnEnable()

@@ -22,6 +22,7 @@ namespace Player
         bool _isBomb;
         [SerializeField] BoardController _boardController;
         [SerializeField] WaitingItems _waitingItems;
+        [SerializeField] PlayerSetting _playerSetting;
 
         static readonly Dictionary<Direction, Vector2Int> directionVec = new Dictionary<Direction, Vector2Int>()
         {
@@ -37,6 +38,7 @@ namespace Player
         public List<Tween> ActiveTweens { get; set; } = new List<Tween>();
         public Item[] Items => _items;
         public bool IsBomb => _isBomb;
+        public PlayerSetting PlayerSetting => _playerSetting;
 
         public async UniTask GroundingProcess()
         {

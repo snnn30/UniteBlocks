@@ -13,11 +13,11 @@ namespace Player
 {
     public class PlayerMove : MonoBehaviour
     {
-        [SerializeField] float _moveDelay = 0.12f;
-
         PlayerInput _input;
         PlayerState _state;
         CancellationTokenSource _moveCTS;
+        PlayerSetting _setting;
+
 
 
         void Move(float value)
@@ -32,7 +32,7 @@ namespace Player
             Vector3 vec3 = new Vector3(direction.x, direction.y, 0);
 
             Tween tween = this.transform
-                .DOBlendableLocalMoveBy(vec3, _moveDelay)
+                .DOBlendableLocalMoveBy(vec3, _setting.MoveDelay)
                 .SetEase(Ease.OutQuart);
             _state.ActiveTweens.Add(tween);
             tween.OnKill(() => _state.ActiveTweens.Remove(tween));
@@ -55,7 +55,7 @@ namespace Player
                 while (true)
                 {
                     Move(context.ReadValue<float>());
-                    await UniTask.Delay(TimeSpan.FromSeconds(_moveDelay), cancellationToken: token);
+                    await UniTask.Delay(TimeSpan.FromSeconds(_setting.MoveDelay), cancellationToken: token);
                 }
             }
         }
@@ -86,6 +86,7 @@ namespace Player
         {
             _input = GetComponent<PlayerInput>();
             _state = GetComponent<PlayerState>();
+            _setting = _state.PlayerSetting;
         }
 
         private void OnEnable()

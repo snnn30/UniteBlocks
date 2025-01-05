@@ -381,7 +381,7 @@ namespace Board
             await DropToBottom();
 
             await _scoreManager.ResolveMultiplication();
-            await UniTask.WaitForSeconds(0.08f);
+            await UniTask.WaitForSeconds(0.2f);
             await _scoreManager.ResolveAddition();
             _scoreManager.SetVisible(false);
         }

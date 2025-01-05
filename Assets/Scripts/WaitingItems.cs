@@ -13,7 +13,6 @@ namespace Board
         [SerializeField] Puyo _prefabPuyo;
         [SerializeField] Bomb _prefabBomb;
         [SerializeField] WaitingBomb _waitingBomb;
-        bool _countSkip = true;
 
 
 
@@ -23,16 +22,12 @@ namespace Board
             {
                 Bomb bomb = GenerateBomb();
                 Item[] items = { bomb, null };
-                _waitingBomb.Count = 0;
-                _countSkip = true;
                 return (items, true);
             }
             else
             {
                 Item[] items = _puyos;
                 _puyos = GeneratePuyos();
-                if (_countSkip) { _countSkip = false; }
-                else { _waitingBomb.Count++; }
                 return (items, false);
             }
         }
@@ -56,6 +51,7 @@ namespace Board
 
         Bomb GenerateBomb()
         {
+            _waitingBomb.UseGauge();
             Bomb returnBomb = Instantiate(_prefabBomb, transform);
             return returnBomb;
         }

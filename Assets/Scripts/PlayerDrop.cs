@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Threading;
+using Board;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -11,15 +12,12 @@ namespace Player
 {
     public class PlayerDrop : MonoBehaviour
     {
-        [SerializeField] float _autoDropDelay = 0.48f;
-        [SerializeField] float _manualDropDelay = 0.08f;
-        [SerializeField] float _stagnationTime = 1.0f;
-
+        [SerializeField] WaitingBomb _waitingBomb;
         float _dropDelay;
         PlayerInput _input;
         PlayerState _state;
         CancellationTokenSource _cancellationTokenSource;
-
+        PlayerSetting _setting;
 
 
         async UniTask Drop()
@@ -31,7 +29,10 @@ namespace Player
 
             if (!_state.CanSet(targetPos, _state.Rotation))
             {
+                _waitingBomb.IsBoosting = false;
+                _waitingBomb.IsGaugeIncreesing = false;
                 await _state.GroundingProcess();
+                _waitingBomb.IsGaugeIncreesing = true;
                 await StartDrop();
                 return;
             }
@@ -47,12 +48,14 @@ namespace Player
 
         void OnDropPerformed(InputAction.CallbackContext context)
         {
-            _dropDelay = _manualDropDelay;
+            _waitingBomb.IsBoosting = true;
+            _dropDelay = _setting.ManualDropDelay;
         }
 
         void OnDropCanceled(InputAction.CallbackContext context)
         {
-            _dropDelay = _autoDropDelay;
+            _waitingBomb.IsBoosting = false;
+            _dropDelay = _setting.AutoDropDelay;
         }
 
 
@@ -60,7 +63,8 @@ namespace Player
         {
             _input = GetComponent<PlayerInput>();
             _state = GetComponent<PlayerState>();
-            _dropDelay = _autoDropDelay;
+            _setting = _state.PlayerSetting;
+            _dropDelay = _setting.AutoDropDelay;
         }
 
         async UniTask StartDrop()
@@ -72,7 +76,7 @@ namespace Player
                 _cancellationTokenSource = null;
             }
             _cancellationTokenSource = new CancellationTokenSource();
-            await UniTask.WaitForSeconds(_stagnationTime, cancellationToken: _cancellationTokenSource.Token);
+            await UniTask.WaitForSeconds(_setting.StagnationTime, cancellationToken: _cancellationTokenSource.Token);
 
             DropContinuous(_cancellationTokenSource.Token).Forget();
             async UniTask DropContinuous(CancellationToken token)

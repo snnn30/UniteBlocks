@@ -2,39 +2,24 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Player;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Utility;
 
 namespace Board
 {
     public class WaitingBomb : MonoBehaviour
     {
-        [SerializeField] SpriteRenderer _gauge;
         [SerializeField] PlayerInput _input;
-        [SerializeField] int _activationCount = 5;
-
-        int _count;
+        [SerializeField] ChainGauge _gauge;
+        [SerializeField] BombGaugeSetting _gaugeSetting;
+        [SerializeField] PlayerSetting _playerSetting;
         Material _material;
 
         public bool IsActive { get; private set; } = false;
-        public int Count
-        {
-            get { return _count; }
-            set
-            {
-                _count = value;
-                if (_count > _activationCount) { _count = _activationCount; }
-                if (_count < 0) { _count = 0; }
-
-                if (_count != _activationCount)
-                {
-                    SetInactiveColor();
-                    IsActive = false;
-                }
-                _gauge.material.SetFloat("_Value", (float)_count / _activationCount);
-            }
-        }
-
+        public bool IsGaugeIncreesing { get; set; } = true;
+        public bool IsBoosting { get; set; } = false;
 
 
         void SetActiveColor()
@@ -58,31 +43,29 @@ namespace Board
                 SetInactiveColor();
                 IsActive = false;
             }
-            else if (Count == _activationCount)
+            else if (_gauge.Value >= 1f)
             {
                 SetActiveColor();
                 IsActive = true;
             }
         }
 
-        /*
-        // テスト用
-        void Update()
+        public void UseGauge()
         {
-            if (Input.GetKeyDown(KeyCode.N)) { Count++; }
-            if (Input.GetKeyDown(KeyCode.M)) { Count = 0; }
+            _gauge.Value -= 1f;
+            SetInactiveColor();
+            IsActive = false;
         }
-        */
+
 
 
         private void Awake()
         {
             _material = GetComponent<SpriteRenderer>().material;
-            Count = 0;
+            _gauge.Value = 0f;
             IsActive = false;
             SetInactiveColor();
         }
-
 
         private void OnEnable()
         {
@@ -92,6 +75,18 @@ namespace Board
         private void OnDisable()
         {
             _input.actions["Swap"].performed -= OnSwapPerformed;
+        }
+
+        private void Update()
+        {
+            if (!IsGaugeIncreesing) { return; }
+            float boost = 1f;
+            if (IsBoosting)
+            {
+                boost *= _playerSetting.AutoDropDelay / _playerSetting.ManualDropDelay;
+                boost *= _gaugeSetting.BoostRatio;
+            }
+            _gauge.Value += Time.deltaTime * _gaugeSetting.IncreasePerSec * boost;
         }
 
     }

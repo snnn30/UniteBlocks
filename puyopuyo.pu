@@ -15,12 +15,20 @@ namespace Player{
         +bool CanSet(Vector2Int pos, Directoin rot)
     }
     enum Direction
+    class PlayerSetting <<ScriptableObject>>{
+        +float AutoDropDelay
+        +float ManualDropDelay
+        +float StagnationTime
+        +float MoveDelay
+        +float RotateDelay
+    }
 
     PlayerDrop --> PlayerState
     PlayerRotate --> PlayerState
     PlayerMove --> PlayerState
     PlayerRotate ..> Direction
     PlayerState *- Direction
+    PlayerSetting <- PlayerState
 }
 
 namespace Items{
@@ -29,7 +37,7 @@ namespace Items{
     class Puyo{
         +PuyoType : PuyoType
     }
-    class PuyoCollerTable{
+    class PuyoCollerTable <<ScriptableObject>>{
         +SerializableDictionary<PuyoType, Color> PuyoColooers
     }
     enum PuyoType
@@ -43,6 +51,7 @@ namespace Items{
 
 namespace Utility{
     class SerializableDictionary
+    class ChainGauge
 }
 
 namespace Manager{
@@ -92,7 +101,6 @@ namespace Score{
 
 
 
-PuyoCollerTable --> SerializableDictionary
 
 PlayerState --> Item
 PlayerState --> BoardController
