@@ -791,7 +791,7 @@
                     "id": "9075cef9-2f4d-4ccd-8188-e15ca47e94d3",
                     "expectedControlType": "Axis",
                     "processors": "",
-                    "interactions": "Hold(duration=0.3,pressPoint=0.8)",
+                    "interactions": "Press",
                     "initialStateCheck": true
                 },
                 {

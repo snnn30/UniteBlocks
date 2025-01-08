@@ -17,8 +17,6 @@ namespace Player
         PlayerState _state;
         CancellationTokenSource _cancellationTokenSource;
         PlayerSetting _setting;
-        bool _done = false;
-
 
 
         bool Rotate(float value)
@@ -69,17 +67,8 @@ namespace Player
             return true;
         }
 
-        void OnRotateStarted(InputAction.CallbackContext callbackContext)
-        {
-            if (Rotate(callbackContext.ReadValue<float>()))
-            {
-                _done = true;
-            };
-        }
-
         void OnRotatePerformed(InputAction.CallbackContext context)
         {
-            if (_done) { return; }
             _cancellationTokenSource = new CancellationTokenSource();
             RotateContinuous(_cancellationTokenSource.Token).Forget();
             async UniTask RotateContinuous(CancellationToken token)
@@ -94,7 +83,6 @@ namespace Player
 
         void OnRotateCanceled(InputAction.CallbackContext context)
         {
-            _done = false;
             if (_cancellationTokenSource != null)
             {
                 _cancellationTokenSource.Cancel();
@@ -123,14 +111,12 @@ namespace Player
 
         private void OnEnable()
         {
-            _input.actions["Rotate"].started += OnRotateStarted;
             _input.actions["Rotate"].performed += OnRotatePerformed;
             _input.actions["Rotate"].canceled += OnRotateCanceled;
         }
 
         private void OnDisable()
         {
-            _input.actions["Rotate"].started -= OnRotateStarted;
             _input.actions["Rotate"].performed -= OnRotatePerformed;
             _input.actions["Rotate"].canceled -= OnRotateCanceled;
         }
