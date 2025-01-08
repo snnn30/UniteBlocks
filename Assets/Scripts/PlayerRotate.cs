@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
@@ -18,10 +17,13 @@ namespace Player
         PlayerState _state;
         CancellationTokenSource _cancellationTokenSource;
         PlayerSetting _setting;
+        bool _done = false;
 
-        void Rotate(float value)
+
+
+        bool Rotate(float value)
         {
-            if (_state.IsBomb) { return; }
+            if (_state.IsBomb) { return true; }
 
             var isRight = (value < 0) ? false : true;
             Direction targetRot;
@@ -38,8 +40,8 @@ namespace Player
                 targetAmount = 90;
             }
 
-            if (!_state.IsAcceptingInput) { return; }
-            if (!_state.CanSet(_state.Position, targetRot)) { return; }
+            if (!_state.IsAcceptingInput) { return false; }
+            if (!_state.CanSet(_state.Position, targetRot)) { return false; }
 
             float currentAngle = 0;
             var parentPuyo = (Puyo)_state.Items[0];
@@ -64,30 +66,35 @@ namespace Player
             tween.OnKill(() => _state.ActiveTweens.Remove(tween));
 
             _state.Rotation = targetRot;
-            return;
+            return true;
         }
 
         void OnRotateStarted(InputAction.CallbackContext callbackContext)
         {
-            Rotate(callbackContext.ReadValue<float>());
+            if (Rotate(callbackContext.ReadValue<float>()))
+            {
+                _done = true;
+            };
         }
 
         void OnRotatePerformed(InputAction.CallbackContext context)
         {
+            if (_done) { return; }
             _cancellationTokenSource = new CancellationTokenSource();
             RotateContinuous(_cancellationTokenSource.Token).Forget();
             async UniTask RotateContinuous(CancellationToken token)
             {
                 while (true)
                 {
-                    Rotate(context.ReadValue<float>());
-                    await UniTask.Delay(TimeSpan.FromSeconds(_setting.RotateDelay), cancellationToken: token);
+                    if (Rotate(context.ReadValue<float>())) { break; }
+                    await UniTask.Yield(cancellationToken: token);
                 }
             }
         }
 
         void OnRotateCanceled(InputAction.CallbackContext context)
         {
+            _done = false;
             if (_cancellationTokenSource != null)
             {
                 _cancellationTokenSource.Cancel();
