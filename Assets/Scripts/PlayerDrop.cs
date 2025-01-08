@@ -29,10 +29,9 @@ namespace Player
 
             if (!_state.CanSet(targetPos, _state.Rotation))
             {
-                _waitingBomb.IsBoosting = false;
                 _waitingBomb.IsGaugeIncreesing = false;
+                //　ここで接地しても動けるように
                 await _state.GroundingProcess();
-                _waitingBomb.IsGaugeIncreesing = true;
                 await StartDrop();
                 return;
             }
@@ -76,7 +75,9 @@ namespace Player
                 _cancellationTokenSource = null;
             }
             _cancellationTokenSource = new CancellationTokenSource();
+            _waitingBomb.IsGaugeIncreesing = false;
             await UniTask.WaitForSeconds(_setting.StagnationTime, cancellationToken: _cancellationTokenSource.Token);
+            _waitingBomb.IsGaugeIncreesing = true;
 
             DropContinuous(_cancellationTokenSource.Token).Forget();
             async UniTask DropContinuous(CancellationToken token)

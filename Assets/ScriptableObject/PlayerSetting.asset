@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _autoDropDelay: 0.48
   _manualDropDelay: 0.06
-  _stagnationTime: 0.5
+  _stagnationTime: 0.8
   _moveDelay: 0.08
-  _rotateDelay: 0.12
+  _rotateDelay: 0.16

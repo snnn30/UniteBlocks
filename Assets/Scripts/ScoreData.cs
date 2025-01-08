@@ -70,7 +70,7 @@ namespace Score
 
         public void SetVisible(bool visible)
         {
-            ConstUI.gameObject.SetActive(visible);
+            if (ConstUI != null) { ConstUI.gameObject.SetActive(visible); }
             ValueUI.gameObject.SetActive(visible);
             IsVisible = visible;
         }
