@@ -40,7 +40,7 @@ namespace Score
 
 
 
-        public async UniTask SetValue(uint targetValue, float seconds, float scale)
+        public async UniTask SetValue(uint targetValue, float seconds, float scale, Ease ease = Ease.Linear)
         {
             if (!IsValid) { Debug.LogWarning("無効な状態"); return; }
             if (!IsVisible) { Debug.LogWarning("表示されていない"); return; }
@@ -55,7 +55,7 @@ namespace Score
                 },
                 targetValue,
                 seconds
-                ).SetEase(Ease.Linear);
+                ).SetEase(ease);
 
             Vector3 originalScale = ValueUI.transform.localScale;
             var scaleTween = DOTween.Sequence()

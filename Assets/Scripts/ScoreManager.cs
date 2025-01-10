@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using UnityEngine;
 
 namespace Score
@@ -60,7 +61,7 @@ namespace Score
             if (IsOperating) { Debug.LogWarning("操作中"); return; }
             IsOperating = true;
 
-            var scoreTween = Score.SetValue(Score.Value + ScoreAddition.Value, TimeToResolve, 1f);
+            var scoreTween = Score.SetValue(Score.Value + ScoreAddition.Value, TimeToResolve, 1f, ease: Ease.InQuint);
             var scoreAddedTween = ScoreAddition.SetValue(0, TimeToResolve, 1f);
 
             await scoreAddedTween;

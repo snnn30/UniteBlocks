@@ -16,36 +16,49 @@ namespace Board
         [SerializeField] BombGaugeSetting _gaugeSetting;
         [SerializeField] PlayerSetting _playerSetting;
         Material _material;
+        bool _isActive;
+        public bool IsActive
+        {
+            get { return _isActive; }
+            private set
+            {
+                _isActive = value;
+                if (value)
+                {
+                    SetActiveColor();
+                    void SetActiveColor()
+                    {
+                        Color beforeColor = _material.color;
+                        Color afterColor = new Color(beforeColor.r, beforeColor.g, beforeColor.b, 1f);
+                        _material.color = afterColor;
+                    }
+                }
+                else
+                {
+                    SetInactiveColor();
+                    void SetInactiveColor()
+                    {
+                        Color beforeColor = _material.color;
+                        Color afterColor = new Color(beforeColor.r, beforeColor.g, beforeColor.b, 0.3f);
+                        _material.color = afterColor;
+                    }
+                }
+            }
+        }
 
-        public bool IsActive { get; private set; } = false;
         public bool IsGaugeIncreasing { get; set; } = true;
         public bool IsBoosting { get; set; } = false;
 
 
-        void SetActiveColor()
-        {
-            Color beforeColor = _material.color;
-            Color afterColor = new Color(beforeColor.r, beforeColor.g, beforeColor.b, 1f);
-            _material.color = afterColor;
-        }
-
-        void SetInactiveColor()
-        {
-            Color beforeColor = _material.color;
-            Color afterColor = new Color(beforeColor.r, beforeColor.g, beforeColor.b, 0.3f);
-            _material.color = afterColor;
-        }
 
         void OnSwapPerformed(InputAction.CallbackContext context)
         {
             if (IsActive)
             {
-                SetInactiveColor();
                 IsActive = false;
             }
             else if (_gauge.Value >= 1f)
             {
-                SetActiveColor();
                 IsActive = true;
             }
         }
@@ -53,7 +66,6 @@ namespace Board
         public void UseGauge()
         {
             _gauge.Value -= 1f;
-            SetInactiveColor();
             IsActive = false;
         }
 
@@ -64,7 +76,6 @@ namespace Board
             _material = GetComponent<SpriteRenderer>().material;
             _gauge.Value = 0f;
             IsActive = false;
-            SetInactiveColor();
         }
 
         private void OnEnable()

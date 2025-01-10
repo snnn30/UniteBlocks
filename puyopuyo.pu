@@ -64,7 +64,8 @@ namespace Manager{
 namespace Board{
     class WaitingBomb{
         +bool IsActive
-        +int Count
+        +bool IsGaugeIncreasing
+        +bool IsBoosting
     }
 
     class WatingItems{
@@ -78,8 +79,13 @@ namespace Board{
         +bool DropToBottom()
         +void Explode(Vector2Int pos)
     }
+    class BombGaugeSetting<<ScriptableObject>>{
+        +flaot IncreasePerSec
+        +float BoostRatio
+    }
 
-    WaitingBomb <- WatingItems 
+    WaitingBomb <- WatingItems
+    WaitingBomb -> BombGaugeSetting
 }
 
 namespace Score{
