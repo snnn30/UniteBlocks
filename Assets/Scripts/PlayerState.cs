@@ -48,9 +48,6 @@ namespace Player
                 await UniTask.Yield();
             }
 
-            // Drop()で発生する若干のずれを修正
-            transform.localPosition = new Vector3(Position.x, Position.y, 0);
-
             if (IsBomb)
             {
                 Destroy(((Bomb)_items[0]).gameObject);

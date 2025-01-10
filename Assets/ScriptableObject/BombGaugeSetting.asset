@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: BombGaugeSetting
   m_EditorClassIdentifier: 
   _increasePerSec: 0.04
-  _boostRatio: 1.3
+  _boostRatio: 1.15

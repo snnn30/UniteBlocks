@@ -18,7 +18,7 @@ namespace Board
         Material _material;
 
         public bool IsActive { get; private set; } = false;
-        public bool IsGaugeIncreesing { get; set; } = true;
+        public bool IsGaugeIncreasing { get; set; } = true;
         public bool IsBoosting { get; set; } = false;
 
 
@@ -79,7 +79,7 @@ namespace Board
 
         private void Update()
         {
-            if (!IsGaugeIncreesing) { return; }
+            if (!IsGaugeIncreasing) { return; }
             float boost = 1f;
             if (IsBoosting)
             {
