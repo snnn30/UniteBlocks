@@ -830,9 +830,9 @@ MonoBehaviour:
   _circle: {fileID: 1618802809}
   _gradient:
     serializedVersion: 2
-    key0: {r: 0.39975077, g: 1, b: 0.24056602, a: 1}
-    key1: {r: 0.90494514, g: 0.90588236, b: 0.16668236, a: 1}
-    key2: {r: 0.9528302, g: 0.17156987, b: 0.15730685, a: 0}
+    key0: {r: 0.3507359, g: 0.8867924, b: 0.20496619, a: 1}
+    key1: {r: 0.9666667, g: 1, b: 0, a: 1}
+    key2: {r: 1, g: 0.017241377, b: 0, a: 0}
     key3: {r: 0, g: 0, b: 0, a: 0}
     key4: {r: 0, g: 0, b: 0, a: 0}
     key5: {r: 0, g: 0, b: 0, a: 0}
@@ -4699,9 +4699,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb9284ddf032c4948b7705d11a6b3e61, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _distanceUI: {fileID: 180193058}
-  _distanceSetting: {fileID: 11400000, guid: 59559a2bc7e931349899cb0697b14c01, type: 2}
-  _gameManager: {fileID: 1340963657}
+  r_distanceUI: {fileID: 180193058}
+  r_distanceSetting: {fileID: 11400000, guid: 59559a2bc7e931349899cb0697b14c01, type: 2}
+  r_gameManager: {fileID: 1340963657}
+  r_volume: {fileID: 1210362307}
 --- !u!1 &2099799140
 GameObject:
   m_ObjectHideFlags: 0

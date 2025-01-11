@@ -22,6 +22,7 @@ namespace Manager
                 InputActionType.Button,
                 "<Keyboard>/anyKey"
                 );
+        bool b_isTimeStopping;
 
         public bool IsGaugeIncreasing { get; set; } = false;
 
@@ -31,7 +32,6 @@ namespace Manager
         {
             StartImage.gameObject.SetActive(true);
             Time.timeScale = 0;
-
 
             AnyKeyAction.performed += OnAnyKey;
         }
@@ -66,7 +66,6 @@ namespace Manager
 
         public void OnGameOver()
         {
-            Time.timeScale = 0;
             DOTween.KillAll();
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }

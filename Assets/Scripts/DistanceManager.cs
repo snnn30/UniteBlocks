@@ -4,45 +4,84 @@
 
 using Manager;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 namespace Score
 {
     public class DistanceManager : MonoBehaviour
     {
-        [SerializeField] DistanceUI _distanceUI;
-        [SerializeField] DistanceSetting _distanceSetting;
-        [SerializeField] GameManager _gameManager;
-        float _value;
-        float _decreasePerSecond;
+        [SerializeField] DistanceUI r_distanceUI;
+        [SerializeField] DistanceSetting r_distanceSetting;
+        [SerializeField] GameManager r_gameManager;
+        [SerializeField] Volume r_volume;
+        float b_value;
+        float w_decreasePerSecond;
+        ChromaticAberration w_chromaticAberration;
+        LensDistortion w_lensDistortion;
+        float r_lensDistortionInitialIntinsity;
 
         public float Value
         {
-            get { return _value; }
+            get { return b_value; }
             set
             {
                 if (value <= 0.0f)
                 {
                     value = 0.0f;
-                    _gameManager.OnGameOver();
+                    r_gameManager.OnGameOver();
                     return;
                 }
-                _value = value;
-                _distanceUI.Value = (uint)value;
+
+                float reflexThreshold = r_distanceSetting.reflexTime * w_decreasePerSecond;
+                if (value < reflexThreshold)
+                {
+                    float v = Mathf.InverseLerp(reflexThreshold, 0f, value);
+                    Time.timeScale = Mathf.Lerp(1f, r_distanceSetting.reflexTimeScale, v);
+                    w_chromaticAberration.intensity.value = v;
+                    w_lensDistortion.intensity.value = Mathf.Lerp(r_lensDistortionInitialIntinsity, -r_lensDistortionInitialIntinsity, v);
+                }
+                else
+                {
+                    if (Time.timeScale != 0f) { Time.timeScale = 1f; }
+                    w_chromaticAberration.intensity.value = 0.0f;
+                    w_lensDistortion.intensity.value = r_lensDistortionInitialIntinsity;
+                }
+
+                b_value = value;
+                r_distanceUI.Value = (uint)value;
             }
+        }
+
+
+
+        private void Awake()
+        {
+            if (!r_volume.profile.TryGet<ChromaticAberration>(out w_chromaticAberration))
+            {
+                Debug.LogWarning("ChromaticAberrationがない");
+            }
+            if (!r_volume.profile.TryGet<LensDistortion>(out w_lensDistortion))
+            {
+                Debug.LogWarning("LensDistortionがない");
+            }
+
+            r_lensDistortionInitialIntinsity = w_lensDistortion.intensity.value;
         }
 
         private void Start()
         {
-            _distanceUI.Threshold = (uint)(_distanceSetting.decreasePerSecond * _distanceSetting.timeToReach);
-            Value = _distanceSetting.initialValue;
-            _decreasePerSecond = _distanceSetting.decreasePerSecond;
+            r_distanceUI.Threshold = (uint)(r_distanceSetting.decreasePerSecond * r_distanceSetting.timeToReach);
+            Value = r_distanceSetting.initialValue;
+            w_decreasePerSecond = r_distanceSetting.decreasePerSecond;
         }
 
         private void Update()
         {
-            if (!_gameManager.IsGaugeIncreasing) { return; }
-            _decreasePerSecond += _distanceSetting.acceleration * Time.deltaTime;
-            Value -= _decreasePerSecond * Time.deltaTime;
+            if (!r_gameManager.IsGaugeIncreasing) { return; }
+            w_decreasePerSecond += r_distanceSetting.acceleration * Time.deltaTime;
+            r_distanceUI.Threshold = (uint)(w_decreasePerSecond * r_distanceSetting.timeToReach);
+            Value -= w_decreasePerSecond * Time.deltaTime;
         }
     }
 }

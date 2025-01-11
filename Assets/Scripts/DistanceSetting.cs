@@ -13,5 +13,7 @@ namespace Score
         public uint initialValue;
         public float timeToReach;
         public float acceleration;
+        public float reflexTime;
+        public float reflexTimeScale;
     }
 }
