@@ -19,6 +19,7 @@ namespace Player
         PlayerSetting _setting;
 
 
+
         bool Rotate(float value)
         {
             if (_state.IsBomb) { return true; }
@@ -120,5 +121,6 @@ namespace Player
             _input.actions["Rotate"].performed -= OnRotatePerformed;
             _input.actions["Rotate"].canceled -= OnRotateCanceled;
         }
+
     }
 }

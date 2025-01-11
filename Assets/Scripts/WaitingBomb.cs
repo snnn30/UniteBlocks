@@ -91,7 +91,7 @@ namespace Board
 
         private void Update()
         {
-            if (_gameManager.IsGaugeIncreasing) { return; }
+            if (!_gameManager.IsGaugeIncreasing) { return; }
             float boost = 1f;
             if (IsBoosting)
             {

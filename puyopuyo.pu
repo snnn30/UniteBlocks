@@ -52,10 +52,13 @@ namespace Items{
 namespace Utility{
     class SerializableDictionary
     class ChainGauge
+    class CircleGauge
+    class UIShake
 }
 
 namespace Manager{
     class GameManager{
+        +bool IsGaugeIncreasing
         +void OnGameOver()
     }
 }
@@ -101,8 +104,19 @@ namespace Score{
         +Unitask ResolveAddition()
         +Unitask ResolveMultiplication()
     }
+    class DistanceUI{
+        +uint Threshold
+        +uint Value
+    }
+    class DistanceManager{
+        +Value
+    }
+    class DistanceSetting<<ScriptableObject>>
 
     ScoreManager -> ScoreData
+    ScoreManager -> DistanceManager
+    DistanceManager --> DistanceUI
+    DistanceManager --> DistanceSetting
 }
 
 
@@ -114,7 +128,6 @@ PlayerState --> WatingItems
 
 WatingItems --> Item
 BoardController --> Puyo
-BoardController --> GameManager
 BoardController -> ScoreManager
 
 @enduml

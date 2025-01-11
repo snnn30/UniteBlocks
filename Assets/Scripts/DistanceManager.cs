@@ -13,13 +13,19 @@ namespace Score
         [SerializeField] DistanceSetting _distanceSetting;
         [SerializeField] GameManager _gameManager;
         float _value;
+        float _decreasePerSecond;
 
-        float Value
+        public float Value
         {
             get { return _value; }
             set
             {
-                if (value < 0.0f) { value = 0.0f; }
+                if (value <= 0.0f)
+                {
+                    value = 0.0f;
+                    _gameManager.OnGameOver();
+                    return;
+                }
                 _value = value;
                 _distanceUI.Value = (uint)value;
             }
@@ -29,12 +35,14 @@ namespace Score
         {
             _distanceUI.Threshold = (uint)(_distanceSetting.decreasePerSecond * _distanceSetting.timeToReach);
             Value = _distanceSetting.initialValue;
+            _decreasePerSecond = _distanceSetting.decreasePerSecond;
         }
 
         private void Update()
         {
             if (!_gameManager.IsGaugeIncreasing) { return; }
-            Value -= _distanceSetting.decreasePerSecond * Time.deltaTime;
+            _decreasePerSecond += _distanceSetting.acceleration * Time.deltaTime;
+            Value -= _decreasePerSecond * Time.deltaTime;
         }
     }
 }

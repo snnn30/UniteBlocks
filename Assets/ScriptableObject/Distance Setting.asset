@@ -14,4 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   decreasePerSecond: 100
   initialValue: 6000
-  timeToReach: 30
+  timeToReach: 60
+  acceleration: 3

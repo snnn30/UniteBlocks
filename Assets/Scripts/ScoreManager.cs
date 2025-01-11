@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using UnityEngine;
 
 namespace Score
@@ -12,6 +13,7 @@ namespace Score
         [SerializeField] ScoreData _score;
         [SerializeField] ScoreData _scoreAddition;
         [SerializeField] ScoreData _scoreMultiplication;
+        [SerializeField] DistanceManager _distanceManager;
         [SerializeField, Range(1f, 2f)] float _scaleAtAddition = 1.2f;
         [SerializeField, Range(0f, 5f)] float _timeToResolve = 2f;
         [SerializeField, Range(0f, 5f)] float _timeToAdd = 0.4f;
@@ -60,11 +62,21 @@ namespace Score
             if (IsOperating) { Debug.LogWarning("操作中"); return; }
             IsOperating = true;
 
-            var scoreTween = Score.SetValue(Score.Value + ScoreAddition.Value, TimeToResolve, 1f);
-            var scoreAddedTween = ScoreAddition.SetValue(0, TimeToResolve, 1f);
+            var scoreTween = Score.SetValue(Score.Value + ScoreAddition.Value, TimeToResolve);
+            var scoreAddedTween = ScoreAddition.SetValue(0, TimeToResolve);
+            var distanceTween = DOTween.To(
+                () => _distanceManager.Value,
+                x =>
+                {
+                    _distanceManager.Value = x;
+                },
+                _distanceManager.Value + ScoreAddition.Value,
+                TimeToResolve
+                );
 
             await scoreAddedTween;
             await scoreTween;
+            await distanceTween;
 
             IsOperating = false;
         }

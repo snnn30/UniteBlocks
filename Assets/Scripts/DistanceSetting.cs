@@ -12,5 +12,6 @@ namespace Score
         public float decreasePerSecond;
         public uint initialValue;
         public float timeToReach;
+        public float acceleration;
     }
 }
