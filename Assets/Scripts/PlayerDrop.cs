@@ -6,6 +6,7 @@ using System.Threading;
 using Board;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using Manager;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -14,6 +15,7 @@ namespace Player
     public class PlayerDrop : MonoBehaviour
     {
         [SerializeField] WaitingBomb _waitingBomb;
+        [SerializeField] GameManager _gameManager;
         float _dropDelay;
         PlayerInput _input;
         PlayerState _state;
@@ -29,7 +31,7 @@ namespace Player
 
             if (!_state.CanSet(targetPos, _state.Rotation))
             {
-                _waitingBomb.IsGaugeIncreasing = false;
+                _gameManager.IsGaugeIncreasing = false;
                 await _state.GroundingProcess();
                 await StartDrop();
                 return;
@@ -85,14 +87,14 @@ namespace Player
                 _cancellationTokenSource = null;
             }
             _cancellationTokenSource = new CancellationTokenSource();
-            _waitingBomb.IsGaugeIncreasing = false;
+            _gameManager.IsGaugeIncreasing = false;
             try
             {
                 await UniTask.WaitForSeconds(_setting.StagnationTime, cancellationToken: _cancellationTokenSource.Token);
             }
             finally
             {
-                _waitingBomb.IsGaugeIncreasing = true;
+                _gameManager.IsGaugeIncreasing = true;
             }
             DropContinuous(_cancellationTokenSource.Token).Forget();
         }

@@ -24,7 +24,7 @@ namespace Score
         public uint Value
         {
             get { return _value; }
-            private set
+            set
             {
                 _value = value;
                 _valueUI.text = _value.ToString();
@@ -40,7 +40,7 @@ namespace Score
 
 
 
-        public async UniTask SetValue(uint targetValue, float seconds, float scale, Ease ease = Ease.Linear)
+        public async UniTask SetValue(uint targetValue, float seconds = 0f, float scale = 1f, Ease ease = Ease.Linear)
         {
             if (!IsValid) { Debug.LogWarning("無効な状態"); return; }
             if (!IsVisible) { Debug.LogWarning("表示されていない"); return; }

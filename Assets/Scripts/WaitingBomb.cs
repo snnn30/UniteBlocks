@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Manager;
 using Player;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -15,6 +16,7 @@ namespace Board
         [SerializeField] ChainGauge _gauge;
         [SerializeField] BombGaugeSetting _gaugeSetting;
         [SerializeField] PlayerSetting _playerSetting;
+        [SerializeField] GameManager _gameManager;
         Material _material;
         bool _isActive;
         public bool IsActive
@@ -46,7 +48,6 @@ namespace Board
             }
         }
 
-        public bool IsGaugeIncreasing { get; set; } = true;
         public bool IsBoosting { get; set; } = false;
 
 
@@ -90,7 +91,7 @@ namespace Board
 
         private void Update()
         {
-            if (!IsGaugeIncreasing) { return; }
+            if (_gameManager.IsGaugeIncreasing) { return; }
             float boost = 1f;
             if (IsBoosting)
             {

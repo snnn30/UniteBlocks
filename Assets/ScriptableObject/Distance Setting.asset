@@ -9,8 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f743de997ba25f14a8fa11dd5a18f8e1, type: 3}
-  m_Name: BombGaugeSetting
+  m_Script: {fileID: 11500000, guid: e716d9b68600ca94ebb504b5296e0f83, type: 3}
+  m_Name: Distance Setting
   m_EditorClassIdentifier: 
-  _increasePerSec: 0.03
-  _boostRatio: 1.15
+  decreasePerSecond: 100
+  initialValue: 6000
+  timeToReach: 30

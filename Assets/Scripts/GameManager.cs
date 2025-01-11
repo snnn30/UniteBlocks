@@ -23,6 +23,8 @@ namespace Manager
                 "<Keyboard>/anyKey"
                 );
 
+        public bool IsGaugeIncreasing { get; set; } = false;
+
 
 
         private void Awake()
@@ -56,6 +58,7 @@ namespace Manager
         {
             StartImage.gameObject.SetActive(false);
             Time.timeScale = 1;
+            IsGaugeIncreasing = true;
             AnyKeyAction.Disable();
         }
 
