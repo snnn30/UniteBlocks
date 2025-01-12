@@ -4,7 +4,11 @@
 
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using Manager;
+using UniRx;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.Rendering;
 
 namespace Score
 {
@@ -14,6 +18,10 @@ namespace Score
         [SerializeField] ScoreData _scoreAddition;
         [SerializeField] ScoreData _scoreMultiplication;
         [SerializeField] DistanceManager _distanceManager;
+        [SerializeField] GameManager _gameManager;
+        [SerializeField] ResultUI _resultUI;
+        [SerializeField] PlayerInput _input;
+        [SerializeField] Volume _volume;
         [SerializeField, Range(1f, 2f)] float _scaleAtAddition = 1.2f;
         [SerializeField, Range(0f, 5f)] float _timeToResolve = 2f;
         [SerializeField, Range(0f, 5f)] float _timeToAdd = 0.4f;
@@ -22,6 +30,7 @@ namespace Score
         ScoreData Score => _score;
         ScoreData ScoreAddition => _scoreAddition;
         ScoreData ScoreMultiplication => _scoreMultiplication;
+        ResultUI ResultUI => _resultUI;
         float ScaleAtAddition => _scaleAtAddition;
         float TimeToResolve => _timeToResolve;
         float TimeToAdd => _timeToAdd;
@@ -31,6 +40,10 @@ namespace Score
         public void Start()
         {
             Score.SetVisible(true);
+            _gameManager.OnGameOver.Subscribe(_ =>
+            {
+                SaveScore().Forget();
+            }).AddTo(this);
         }
 
 
@@ -94,6 +107,39 @@ namespace Score
             await scoreMultiplicationTween;
 
             IsOperating = false;
+        }
+
+        public async UniTask SaveScore()
+        {
+            _distanceManager.ResetPostProcess();
+
+            if (Score.Value > (uint)PlayerPrefs.GetInt("HighScore1") + (uint)PlayerPrefs.GetInt("HighScore2"))
+            {
+                if (Score.Value > int.MaxValue)
+                {
+                    PlayerPrefs.SetInt("HighScore1", int.MaxValue);
+                    PlayerPrefs.SetInt("HighScore2", (int)(Score.Value - int.MaxValue));
+                }
+                else
+                {
+                    PlayerPrefs.SetInt("HighScore1", (int)Score.Value);
+                }
+            }
+
+            ResultUI.HighScore = (uint)PlayerPrefs.GetInt("HighScore1") + (uint)PlayerPrefs.GetInt("HighScore2");
+            ResultUI.CurrentScore = Score.Value;
+            ResultUI.gameObject.SetActive(true);
+            ResultUI.SetVisilityPressAnyKey(false);
+
+            await UniTask.WaitForSeconds(2f, ignoreTimeScale: true);
+            ResultUI.SetVisilityPressAnyKey(true);
+            _input.actions["AnyKey"].performed += OnAnyKeyPerformed;
+
+            void OnAnyKeyPerformed(InputAction.CallbackContext context)
+            {
+                _input.actions["AnyKey"].performed -= OnAnyKeyPerformed;
+                _gameManager.Restart();
+            }
         }
 
         /*

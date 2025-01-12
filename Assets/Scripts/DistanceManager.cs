@@ -20,37 +20,45 @@ namespace Score
         ChromaticAberration w_chromaticAberration;
         LensDistortion w_lensDistortion;
         float r_lensDistortionInitialIntinsity;
+        float w_timeScale = 1f;
+        bool w_stop = false;
 
         public float Value
         {
             get { return b_value; }
             set
             {
+                if (w_stop) { return; }
+
                 if (value <= 0.0f)
                 {
-                    value = 0.0f;
-                    r_gameManager.OnGameOver();
+                    w_stop = true;
+                    r_gameManager.GameOver();
                     return;
                 }
+
+                b_value = value;
+                r_distanceUI.Value = (uint)value;
 
                 float reflexThreshold = r_distanceSetting.reflexTime * w_decreasePerSecond;
                 if (value < reflexThreshold)
                 {
                     float v = Mathf.InverseLerp(reflexThreshold, 0f, value);
-                    Time.timeScale = Mathf.Lerp(1f, r_distanceSetting.reflexTimeScale, v);
+                    w_timeScale = Mathf.Lerp(1f, r_distanceSetting.reflexTimeScale, v);
                     w_chromaticAberration.intensity.value = v;
                     w_lensDistortion.intensity.value = Mathf.Lerp(r_lensDistortionInitialIntinsity, -r_lensDistortionInitialIntinsity, v);
                 }
                 else
                 {
-                    if (Time.timeScale != 0f) { Time.timeScale = 1f; }
-                    w_chromaticAberration.intensity.value = 0.0f;
-                    w_lensDistortion.intensity.value = r_lensDistortionInitialIntinsity;
+                    ResetPostProcess();
                 }
-
-                b_value = value;
-                r_distanceUI.Value = (uint)value;
             }
+        }
+
+        public void ResetPostProcess()
+        {
+            w_chromaticAberration.intensity.value = 0.0f;
+            w_lensDistortion.intensity.value = r_lensDistortionInitialIntinsity;
         }
 
 
@@ -79,9 +87,9 @@ namespace Score
         private void Update()
         {
             if (!r_gameManager.IsGaugeIncreasing) { return; }
-            w_decreasePerSecond += r_distanceSetting.acceleration * Time.deltaTime;
+            w_decreasePerSecond += r_distanceSetting.acceleration * Time.deltaTime * w_timeScale;
             r_distanceUI.Threshold = (uint)(w_decreasePerSecond * r_distanceSetting.timeToReach);
-            Value -= w_decreasePerSecond * Time.deltaTime;
+            Value -= w_decreasePerSecond * Time.deltaTime * w_timeScale;
         }
     }
 }

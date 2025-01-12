@@ -16,5 +16,5 @@ MonoBehaviour:
   initialValue: 2000
   timeToReach: 60
   acceleration: 3
-  reflexTime: 16
-  reflexTimeScale: 0.7
+  reflexTime: 6
+  reflexTimeScale: 0.2

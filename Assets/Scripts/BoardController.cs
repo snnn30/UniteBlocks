@@ -176,7 +176,7 @@ namespace Board
         bool CheckGameOver()
         {
             if (_coord[START_POS.x, START_POS.y] == null) { return false; }
-            _gameManager.OnGameOver();
+            _gameManager.GameOver();
             return true;
         }
 

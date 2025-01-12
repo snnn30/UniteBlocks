@@ -34,7 +34,7 @@ namespace Player
 
         public Vector2Int Position { get; set; }
         public Direction Rotation { get; set; }
-        public bool IsAcceptingInput { get; private set; } = true;
+        public bool IsAcceptingInput { get; set; } = true;
         public List<Tween> ActiveTweens { get; set; } = new List<Tween>();
         public Item[] Items => _items;
         public bool IsBomb => _isBomb;
@@ -47,6 +47,7 @@ namespace Player
             {
                 await UniTask.Yield();
             }
+            IsAcceptingInput = false;
 
             if (IsBomb)
             {
