@@ -25,10 +25,16 @@ public class CountDownUI : MonoBehaviour
     }
 
 
-    public async UniTask CountDown()
+
+    private void Awake()
     {
         Count = _initialCount;
+    }
 
+
+
+    public async UniTask CountDown()
+    {
         while (Count > 0)
         {
             var originalScale = _countUI.rectTransform.localScale;

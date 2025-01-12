@@ -26,7 +26,7 @@ namespace Score
         [SerializeField, Range(0f, 5f)] float _timeToResolve = 2f;
         [SerializeField, Range(0f, 5f)] float _timeToAdd = 0.4f;
 
-        bool IsOperating { get; set; } = false;
+        public bool IsOperating { get; private set; } = false;
         ScoreData Score => _score;
         ScoreData ScoreAddition => _scoreAddition;
         ScoreData ScoreMultiplication => _scoreMultiplication;
@@ -75,7 +75,10 @@ namespace Score
             if (IsOperating) { Debug.LogWarning("操作中"); return; }
             IsOperating = true;
 
-            var scoreTween = Score.SetValue(Score.Value + ScoreAddition.Value, TimeToResolve);
+            uint targetScore = Score.Value + ScoreAddition.Value;
+            if (targetScore > 999999999) { targetScore = 999999999; }
+
+            var scoreTween = Score.SetValue(targetScore, TimeToResolve);
             var scoreAddedTween = ScoreAddition.SetValue(0, TimeToResolve);
             var distanceTween = DOTween.To(
                 () => _distanceManager.Value,
@@ -90,6 +93,9 @@ namespace Score
             await scoreAddedTween;
             await scoreTween;
             await distanceTween;
+
+            // この方法でゲームオーバーにするとDotweenで警告が出るが問題なく動作する
+            if (targetScore == 999999999) { _gameManager.GameOver(); }
 
             IsOperating = false;
         }
@@ -142,17 +148,14 @@ namespace Score
             }
         }
 
-        /*
+
         // テスト用
-        bool sw = true;
+        /*
         void Update()
         {
-            if (Input.GetKeyDown(KeyCode.N)) { AddScoreAddition(100).Forget(); }
-            if (Input.GetKeyDown(KeyCode.B)) { AddScoreMultiplication(4).Forget(); }
-            if (Input.GetKeyDown(KeyCode.M)) { SetVisible(sw); sw = !sw; }
-            if (Input.GetKeyDown(KeyCode.C)) { ResolveAddition().Forget(); }
-            if (Input.GetKeyDown(KeyCode.V)) { ResolveMultiplication().Forget(); }
+            if (Input.GetKeyDown(KeyCode.N)) { Score.Value = 999999100; }
         }
         */
+
     }
 }

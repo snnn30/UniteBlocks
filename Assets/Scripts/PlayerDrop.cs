@@ -7,6 +7,7 @@ using Board;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Manager;
+using Score;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -16,6 +17,7 @@ namespace Player
     {
         [SerializeField] WaitingBomb _waitingBomb;
         [SerializeField] GameManager _gameManager;
+        [SerializeField] ScoreManager _scoreManager;
         float _dropDelay;
         PlayerInput _input;
         PlayerState _state;
@@ -57,6 +59,7 @@ namespace Player
             }
             _cancellationTokenSource = new CancellationTokenSource();
 
+            if (!_scoreManager.IsOperating) { _gameManager.IsGaugeIncreasing = true; }
             _waitingBomb.IsBoosting = true;
             _dropDelay = _setting.ManualDropDelay;
 
@@ -88,14 +91,9 @@ namespace Player
             }
             _cancellationTokenSource = new CancellationTokenSource();
             _gameManager.IsGaugeIncreasing = false;
-            try
-            {
-                await UniTask.WaitForSeconds(_setting.StagnationTime, cancellationToken: _cancellationTokenSource.Token);
-            }
-            finally
-            {
-                _gameManager.IsGaugeIncreasing = true;
-            }
+
+            await UniTask.WaitForSeconds(_setting.StagnationTime, cancellationToken: _cancellationTokenSource.Token);
+
             DropContinuous(_cancellationTokenSource.Token).Forget();
         }
 
