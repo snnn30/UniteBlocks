@@ -58,6 +58,8 @@ namespace Player
                 return;
             }
 
+            Destroy(((Puyo)_items[0]).transform.GetChild(0).gameObject);
+
             _boardController.Settle(Position, (Puyo)_items[0]);
             _boardController.Settle(CalcChildPuyoPos(Position, Rotation), (Puyo)_items[1]);
 

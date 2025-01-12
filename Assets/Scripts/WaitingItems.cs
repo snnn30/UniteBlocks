@@ -13,6 +13,7 @@ namespace Board
         [SerializeField] Puyo _prefabPuyo;
         [SerializeField] Bomb _prefabBomb;
         [SerializeField] WaitingBomb _waitingBomb;
+        [SerializeField] SpriteMask _prefabPuyoMask;
 
 
 
@@ -45,6 +46,8 @@ namespace Board
             int len = System.Enum.GetValues(typeof(PuyoType)).Length;
             returnPuyos[0].PuyoType = (PuyoType)Random.Range(1, len);
             returnPuyos[1].PuyoType = (PuyoType)Random.Range(1, len);
+
+            Instantiate(_prefabPuyoMask, returnPuyos[0].transform);
 
             return returnPuyos;
         }
