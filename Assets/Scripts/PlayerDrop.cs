@@ -37,17 +37,12 @@ namespace Player
                 return;
             }
 
-            _state.IsAcceptingInput = false;
             Vector3 vec3 = Vector3.down;
             Tween tween = this.transform
                 .DOBlendableLocalMoveBy(vec3, _dropDelay / 5)
                 .SetEase(Ease.InOutQuad);
             _state.ActiveTweens.Add(tween);
-            _ = tween.OnKill(() =>
-            {
-                _state.ActiveTweens.Remove(tween);
-                _state.IsAcceptingInput = true;
-            });
+            _ = tween.OnKill(() => _state.ActiveTweens.Remove(tween));
 
             _state.Position = targetPos;
         }

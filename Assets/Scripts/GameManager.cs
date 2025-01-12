@@ -16,7 +16,9 @@ namespace Manager
     public class GameManager : MonoBehaviour
     {
         [SerializeField] StartUI _startUI;
+        [SerializeField] CountDownUI _countdownUI;
         StartUI StartUI => _startUI;
+        CountDownUI CountDownUI => _countdownUI;
         InputAction AnyKeyAction { get; } = new InputAction(
                 "AnyKey",
                 InputActionType.Button,
@@ -57,12 +59,17 @@ namespace Manager
             AnyKeyAction.Disable();
         }
 
-        void OnAnyKey(InputAction.CallbackContext context)
+        async void OnAnyKey(InputAction.CallbackContext context)
         {
+            AnyKeyAction.Disable();
             StartUI.gameObject.SetActive(false);
+
+            CountDownUI.gameObject.SetActive(true);
+            await CountDownUI.CountDown();
+            CountDownUI.gameObject.SetActive(false);
+
             Time.timeScale = 1;
             IsGaugeIncreasing = true;
-            AnyKeyAction.Disable();
         }
 
 
