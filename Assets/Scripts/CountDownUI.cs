@@ -35,6 +35,7 @@ public class CountDownUI : MonoBehaviour
 
     public async UniTask CountDown()
     {
+        Count = _initialCount;
         while (Count > 0)
         {
             var originalScale = _countUI.rectTransform.localScale;
