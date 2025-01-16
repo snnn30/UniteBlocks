@@ -15,7 +15,6 @@ namespace UniteBlocks
         const int BOARD_HEIGHT = 14;
         const uint POINT = 100;
         public static readonly Vector2Int START_POS = new Vector2Int(2, 12);
-        // public static readonly int MAX_HEIGHT = 11;
         Vector2Int?[,] _coord = new Vector2Int?[BOARD_WIDTH, BOARD_HEIGHT];
         Block[,] _origins = new Block[BOARD_WIDTH, BOARD_HEIGHT];
 
