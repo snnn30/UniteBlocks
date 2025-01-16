@@ -10,7 +10,7 @@ namespace UniteBlocks
     public class DistanceSetting : ScriptableObject
     {
         public float DecreasePerSecond => m_DecreasePerSecond;
-        public uint InitialValue => m_InitialValue;
+        public int InitialValue => m_InitialValue;
         public float TimeToReach => m_TimeToReach;
         public float Acceleration => m_Acceleration;
         public float ReflexTime => m_ReflexTime;
@@ -20,7 +20,7 @@ namespace UniteBlocks
         private float m_DecreasePerSecond;
 
         [SerializeField]
-        private uint m_InitialValue;
+        private int m_InitialValue;
 
         [SerializeField]
         private float m_TimeToReach;

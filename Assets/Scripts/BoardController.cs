@@ -15,7 +15,7 @@ namespace UniteBlocks
 
         private const int BOARD_WIDTH = 6;
         private const int BOARD_HEIGHT = 14;
-        private const uint POINT = 100;
+        private const int POINT = 100;
 
         private Vector2Int?[,] m_Coord = new Vector2Int?[BOARD_WIDTH, BOARD_HEIGHT];
         private Block[,] m_Origins = new Block[BOARD_WIDTH, BOARD_HEIGHT];
@@ -352,16 +352,16 @@ namespace UniteBlocks
             List<Tween> activeTweens = new List<Tween>();
             foreach (var list in origins)
             {
-                uint points = 0;
-                uint multiplier = 0;
+                int points = 0;
+                int multiplier = 0;
                 foreach (var target in list)
                 {
                     var width = m_Origins[target.x, target.y].Shape.x;
                     var height = m_Origins[target.x, target.y].Shape.y;
-                    points += POINT * (uint)width * (uint)height;
+                    points += POINT * width * height;
                     if (width != 1 || height != 1)
                     {
-                        multiplier += (uint)width * (uint)height;
+                        multiplier += width * height;
                     }
 
                     var tween = m_Origins[target.x, target.y].transform

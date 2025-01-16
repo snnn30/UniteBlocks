@@ -10,8 +10,8 @@ namespace UniteBlocks
 {
     public class DistanceUI : MonoBehaviour
     {
-        public uint Threshold { get; set; }
-        public uint Value
+        public int Threshold { get; set; }
+        public int Value
         {
             get { return b_Value; }
             set
@@ -35,6 +35,6 @@ namespace UniteBlocks
         [SerializeField]
         private float m_MinScale;
 
-        private uint b_Value;
+        private int b_Value;
     }
 }

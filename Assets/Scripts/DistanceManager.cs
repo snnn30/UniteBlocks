@@ -25,7 +25,7 @@ namespace UniteBlocks
                 }
 
                 b_Value = value;
-                m_DistanceUI.Value = (uint)value;
+                m_DistanceUI.Value = (int)value;
 
                 float reflexThreshold = m_DistanceSetting.ReflexTime * m_DecreasePerSecond;
                 if (value < reflexThreshold)
@@ -79,7 +79,7 @@ namespace UniteBlocks
 
         private void Start()
         {
-            m_DistanceUI.Threshold = (uint)(m_DistanceSetting.DecreasePerSecond * m_DistanceSetting.TimeToReach);
+            m_DistanceUI.Threshold = (int)(m_DistanceSetting.DecreasePerSecond * m_DistanceSetting.TimeToReach);
             Value = m_DistanceSetting.InitialValue;
             m_DecreasePerSecond = m_DistanceSetting.DecreasePerSecond;
         }
@@ -88,7 +88,7 @@ namespace UniteBlocks
         {
             if (!m_GameManager.IsGaugeIncreasing) { return; }
             m_DecreasePerSecond += m_DistanceSetting.Acceleration * Time.deltaTime * m_TimeScale;
-            m_DistanceUI.Threshold = (uint)(m_DecreasePerSecond * m_DistanceSetting.TimeToReach);
+            m_DistanceUI.Threshold = (int)(m_DecreasePerSecond * m_DistanceSetting.TimeToReach);
             Value -= m_DecreasePerSecond * Time.deltaTime * m_TimeScale;
         }
 

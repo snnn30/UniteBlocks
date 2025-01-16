@@ -3,7 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
+using LitMotion;
+using LitMotion.Extensions;
 using TMPro;
 using UnityEngine;
 
@@ -11,7 +12,7 @@ namespace UniteBlocks
 {
     public class ScoreData : MonoBehaviour
     {
-        public uint Value
+        public int Value
         {
             get { return b_Value; }
             set
@@ -28,9 +29,9 @@ namespace UniteBlocks
         private TextMeshProUGUI m_ValueUI;
 
         [SerializeField]
-        private uint m_InitialValue;
+        private int m_InitialValue;
 
-        private uint b_Value;
+        private int b_Value;
         private bool m_IsOperating = false;
         private bool m_IsVisible = false;
 
@@ -40,30 +41,22 @@ namespace UniteBlocks
             SetVisible(false);
         }
 
-        public async UniTask SetValue(uint targetValue, float seconds = 0f, float scale = 1f, Ease ease = Ease.Linear)
+        public async UniTask SetValue(int targetValue, float seconds = 0f, float scale = 1f, Ease ease = Ease.Linear)
         {
             if (m_IsOperating) { Debug.LogWarning("無効な状態"); return; }
             if (!m_IsVisible) { Debug.LogWarning("表示されていない"); return; }
 
             m_IsOperating = true;
 
-            var numTween = DOTween.To(
-                () => Value,
-                x =>
-                {
-                    Value = x;
-                },
-                targetValue,
-                seconds
-                ).SetEase(ease);
+            var numTween = LMotion.Create((long)Value, (long)targetValue, seconds)
+                .WithEase(ease)
+                .Bind(x => Value = (int)x);
 
             Vector3 originalScale = m_ValueUI.transform.localScale;
-            var scaleTween = DOTween.Sequence()
-              .Append(m_ValueUI.transform.DOScale(originalScale * scale, seconds / 2f).SetEase(Ease.InOutQuad))
-              .Append(m_ValueUI.transform.DOScale(originalScale, seconds / 2f).SetEase(Ease.InOutQuad));
 
+            await LMotion.Create(m_ValueUI.transform.localScale, originalScale * scale, seconds * 0.5f).WithEase(Ease.InOutQuad).BindToLocalScale(m_ValueUI.transform);
+            await LMotion.Create(m_ValueUI.transform.localScale, originalScale, seconds * 0.5f).WithEase(Ease.InOutQuad).BindToLocalScale(m_ValueUI.transform);
             await numTween;
-            await scaleTween;
 
             m_IsOperating = false;
         }

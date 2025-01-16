@@ -9,7 +9,7 @@ namespace UniteBlocks
 {
     public class ResultUI : MonoBehaviour
     {
-        public uint HighScore
+        public int HighScore
         {
             get { return b_HighScore; }
             set
@@ -19,7 +19,7 @@ namespace UniteBlocks
             }
         }
 
-        public uint CurrentScore
+        public int CurrentScore
         {
             get { return b_CurrentScore; }
             set
@@ -38,8 +38,8 @@ namespace UniteBlocks
         [SerializeField]
         private TextMeshProUGUI m_PressAnyKey;
 
-        private uint b_HighScore;
-        private uint b_CurrentScore;
+        private int b_HighScore;
+        private int b_CurrentScore;
 
         public void SetVisilityPressAnyKey(bool visible)
         {
