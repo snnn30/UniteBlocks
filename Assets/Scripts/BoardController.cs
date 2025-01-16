@@ -11,20 +11,32 @@ namespace UniteBlocks
 {
     public class BoardController : MonoBehaviour
     {
-        const int BOARD_WIDTH = 6;
-        const int BOARD_HEIGHT = 14;
-        const uint POINT = 100;
         public static readonly Vector2Int START_POS = new Vector2Int(2, 12);
-        Vector2Int?[,] _coord = new Vector2Int?[BOARD_WIDTH, BOARD_HEIGHT];
-        Block[,] _origins = new Block[BOARD_WIDTH, BOARD_HEIGHT];
 
-        [SerializeField] Block _prefabPuyo;
-        [SerializeField] GameObject _puyosContainer;
-        [SerializeField] GameManager _gameManager;
-        [SerializeField] ScoreManager _scoreManager;
-        [SerializeField] float _dropSpeed = 0.5f;
-        [SerializeField] float _rotateTime = 1;
-        [SerializeField] float _dissolveTime = 0.1f;
+        private const int BOARD_WIDTH = 6;
+        private const int BOARD_HEIGHT = 14;
+        private const uint POINT = 100;
+
+        private Vector2Int?[,] m_Coord = new Vector2Int?[BOARD_WIDTH, BOARD_HEIGHT];
+        private Block[,] m_Origins = new Block[BOARD_WIDTH, BOARD_HEIGHT];
+
+        [SerializeField]
+        private GameObject m_BlocksContainer;
+
+        [SerializeField]
+        private GameManager m_GameManager;
+
+        [SerializeField]
+        private ScoreManager m_ScoreManager;
+
+        [SerializeField]
+        private float m_DropTime = 0.5f;
+
+        [SerializeField]
+        private float m_RotateTime = 1.2f;
+
+        [SerializeField]
+        private float m_DissolveTime = 0.28f;
 
         void ClearAll()
         {
@@ -32,10 +44,10 @@ namespace UniteBlocks
             {
                 for (int x = 0; x < BOARD_WIDTH; x++)
                 {
-                    _coord[x, y] = null;
-                    if (_origins == null) { continue; }
-                    Destroy(_origins[x, y]);
-                    _origins[x, y] = null;
+                    m_Coord[x, y] = null;
+                    if (m_Origins == null) { continue; }
+                    Destroy(m_Origins[x, y]);
+                    m_Origins[x, y] = null;
                 }
             }
         }
@@ -61,7 +73,7 @@ namespace UniteBlocks
                 {
                     var target = new Vector2Int(x, y);
                     if (!IsValid(target)) { return false; }
-                    if (_coord[x, y] != null) { return false; }
+                    if (m_Coord[x, y] != null) { return false; }
                 }
             }
             return true;
@@ -69,7 +81,7 @@ namespace UniteBlocks
         public bool CanSettle(Vector2Int pos)
         {
             if (!IsValid(pos)) { return false; }
-            if (_coord[pos.x, pos.y] != null) { return false; }
+            if (m_Coord[pos.x, pos.y] != null) { return false; }
             return true;
         }
 
@@ -84,14 +96,14 @@ namespace UniteBlocks
                 return;
             }
 
-            puyo.transform.parent = _puyosContainer.transform;
-            _origins[pos.x, pos.y] = puyo;
+            puyo.transform.parent = m_BlocksContainer.transform;
+            m_Origins[pos.x, pos.y] = puyo;
 
             for (int x = pos.x; x < pos.x + puyo.Shape.x; x++)
             {
                 for (int y = pos.y; y < pos.y + puyo.Shape.y; y++)
                 {
-                    _coord[x, y] = pos;
+                    m_Coord[x, y] = pos;
                 }
             }
         }
@@ -101,23 +113,23 @@ namespace UniteBlocks
         /// </summary>
         void Delete(Vector2Int pos)
         {
-            if (_origins[pos.x, pos.y] == null)
+            if (m_Origins[pos.x, pos.y] == null)
             {
                 Debug.LogError("削除対象が存在しない");
                 return;
             }
 
-            var puyo = _origins[pos.x, pos.y];
+            var puyo = m_Origins[pos.x, pos.y];
 
             for (int x = pos.x; x < pos.x + puyo.Shape.x; x++)
             {
                 for (int y = pos.y; y < pos.y + puyo.Shape.y; y++)
                 {
-                    _coord[x, y] = null;
+                    m_Coord[x, y] = null;
                 }
             }
 
-            _origins[pos.x, pos.y] = null;
+            m_Origins[pos.x, pos.y] = null;
         }
 
         /// <summary>
@@ -132,9 +144,9 @@ namespace UniteBlocks
             {
                 for (int x = 0; x < BOARD_WIDTH; x++)
                 {
-                    if (_origins[x, y] == null) { continue; }
+                    if (m_Origins[x, y] == null) { continue; }
 
-                    var puyo = _origins[x, y];
+                    var puyo = m_Origins[x, y];
                     int targetHeight = y;
 
                     // 先に自身を消す事で自身に干渉しないようにする
@@ -152,7 +164,7 @@ namespace UniteBlocks
                     if (targetHeight == y) { continue; }
 
                     var tween = puyo.transform
-                        .DOLocalMoveY(targetHeight, _dropSpeed)
+                        .DOLocalMoveY(targetHeight, m_DropTime)
                         .SetEase(Ease.OutBounce);
                     activeTweens.Add(tween);
                     _ = tween.OnKill(() => activeTweens.Remove(tween));
@@ -171,8 +183,8 @@ namespace UniteBlocks
 
         bool CheckGameOver()
         {
-            if (_coord[START_POS.x, START_POS.y] == null) { return false; }
-            _gameManager.GameOver();
+            if (m_Coord[START_POS.x, START_POS.y] == null) { return false; }
+            m_GameManager.GameOver();
             return true;
         }
 
@@ -184,8 +196,8 @@ namespace UniteBlocks
             {
                 for (int y = 0; y < BOARD_HEIGHT; y++)
                 {
-                    if (_origins[x, y] == null) { continue; }
-                    var puyo = _origins[x, y];
+                    if (m_Origins[x, y] == null) { continue; }
+                    var puyo = m_Origins[x, y];
 
                     Vector2Int targetShape = puyo.Shape;
                     List<Vector2Int> deletePuyos = new List<Vector2Int>();
@@ -205,7 +217,7 @@ namespace UniteBlocks
 
                     foreach (var pos in deletePuyos)
                     {
-                        Destroy(_origins[pos.x, pos.y].gameObject);
+                        Destroy(m_Origins[pos.x, pos.y].gameObject);
                         Delete(pos);
                     }
 
@@ -214,7 +226,7 @@ namespace UniteBlocks
                     {
                         for (int j = y; j < y + targetShape.y; j++)
                         {
-                            _coord[i, j] = new Vector2Int(x, y);
+                            m_Coord[i, j] = new Vector2Int(x, y);
                         }
                     }
 
@@ -231,7 +243,7 @@ namespace UniteBlocks
                             prex = x;
                         },
                         360f,
-                        _rotateTime
+                        m_RotateTime
                         ).SetEase(Ease.OutBack);
                     tweens.Add(tween);
                     _ = tween.OnKill(() => tweens.Remove(tween));
@@ -245,15 +257,15 @@ namespace UniteBlocks
                     bool CheckInRange(int x0, int y0, int x1, int y1, ref List<Vector2Int> deletePuyos)
                     {
                         if (x0 == x1 || y0 == y1) { return false; }
-                        Color type = _origins[x0, y0].Color;
+                        Color type = m_Origins[x0, y0].Color;
                         List<Vector2Int> origins = new List<Vector2Int>();
 
                         for (int i = x0; i <= x1; i++)
                         {
                             for (int j = y0; j <= y1; j++)
                             {
-                                if (_coord[i, j] == null) { return false; }
-                                Vector2Int pos = (Vector2Int)_coord[i, j];
+                                if (m_Coord[i, j] == null) { return false; }
+                                Vector2Int pos = (Vector2Int)m_Coord[i, j];
                                 if (origins.Contains(pos)) { continue; }
                                 origins.Add(pos);
                             }
@@ -261,7 +273,7 @@ namespace UniteBlocks
 
                         foreach (Vector2Int pos in origins)
                         {
-                            Block target = _origins[pos.x, pos.y];
+                            Block target = m_Origins[pos.x, pos.y];
                             if (target.Color != type) { return false; }
                             if (pos.x < x0 || pos.y < y0) { return false; }
                             if (pos.x + target.Shape.x - 1 > x1 || pos.y + target.Shape.y - 1 > y1) { return false; }
@@ -288,10 +300,10 @@ namespace UniteBlocks
         {
             pos += Vector2Int.down;
             if (!IsValid(pos)) { return; }
-            if (_coord[pos.x, pos.y] == null) { return; }
+            if (m_Coord[pos.x, pos.y] == null) { return; }
 
-            Vector2Int origin = (Vector2Int)_coord[pos.x, pos.y];
-            Color type = _origins[origin.x, origin.y].Color;
+            Vector2Int origin = (Vector2Int)m_Coord[pos.x, pos.y];
+            Color type = m_Origins[origin.x, origin.y].Color;
 
             List<List<Vector2Int>> origins = new List<List<Vector2Int>>();
             origins.Add(new List<Vector2Int> { origin });
@@ -312,10 +324,10 @@ namespace UniteBlocks
                     foreach (var target in inspectionPositions)
                     {
                         if (!IsValid(target)) { continue; }
-                        if (_coord[target.x, target.y] == null) { continue; }
-                        Vector2Int targetOrigin = (Vector2Int)_coord[target.x, target.y];
+                        if (m_Coord[target.x, target.y] == null) { continue; }
+                        Vector2Int targetOrigin = (Vector2Int)m_Coord[target.x, target.y];
 
-                        if (_origins[targetOrigin.x, targetOrigin.y].Color != type) continue;
+                        if (m_Origins[targetOrigin.x, targetOrigin.y].Color != type) continue;
                         bool isContinue = false;
                         foreach (var list in origins)
                         {
@@ -336,7 +348,7 @@ namespace UniteBlocks
                 origins.Add(addList);
             }
 
-            _scoreManager.SetVisible(true);
+            m_ScoreManager.SetVisible(true);
             List<Tween> activeTweens = new List<Tween>();
             foreach (var list in origins)
             {
@@ -344,28 +356,28 @@ namespace UniteBlocks
                 uint multiplier = 0;
                 foreach (var target in list)
                 {
-                    var width = _origins[target.x, target.y].Shape.x;
-                    var height = _origins[target.x, target.y].Shape.y;
+                    var width = m_Origins[target.x, target.y].Shape.x;
+                    var height = m_Origins[target.x, target.y].Shape.y;
                     points += POINT * (uint)width * (uint)height;
                     if (width != 1 || height != 1)
                     {
                         multiplier += (uint)width * (uint)height;
                     }
 
-                    var tween = _origins[target.x, target.y].transform
-                        .DOScale(0, _dissolveTime)
+                    var tween = m_Origins[target.x, target.y].transform
+                        .DOScale(0, m_DissolveTime)
                         .SetEase(Ease.OutExpo);
                     activeTweens.Add(tween);
                     _ = tween.OnKill(() =>
                     {
                         activeTweens.Remove(tween);
-                        Destroy(_origins[target.x, target.y].gameObject);
+                        Destroy(m_Origins[target.x, target.y].gameObject);
                         Delete(target);
                     });
 
                 }
-                await _scoreManager.AddScoreAddition(points);
-                await _scoreManager.AddScoreMultiplication(multiplier);
+                await m_ScoreManager.AddScoreAddition(points);
+                await m_ScoreManager.AddScoreMultiplication(multiplier);
             }
 
             await UniTask.WaitForSeconds(0.08f);
@@ -376,30 +388,30 @@ namespace UniteBlocks
             }
             await DropToBottom();
 
-            await _scoreManager.ResolveMultiplication();
+            await m_ScoreManager.ResolveMultiplication();
             await UniTask.WaitForSeconds(0.2f);
-            await _scoreManager.ResolveAddition();
-            _scoreManager.SetVisible(false);
+            await m_ScoreManager.ResolveAddition();
+            m_ScoreManager.SetVisible(false);
         }
 
         // 斜めは含まない
         List<Vector2Int> GetTouchingPuyo(Vector2Int origin)
         {
             List<Vector2Int> outList = new List<Vector2Int>();
-            Block puyo = _origins[origin.x, origin.y];
+            Block puyo = m_Origins[origin.x, origin.y];
 
             for (int i = origin.x - 1; i < origin.x + puyo.Shape.x + 1; i++)
             {
                 for (int j = origin.y - 1; j < origin.y + puyo.Shape.y + 1; j++)
                 {
                     if (!IsValid(new Vector2Int(i, j))) { continue; }
-                    if (_coord[i, j] == null) { continue; }
+                    if (m_Coord[i, j] == null) { continue; }
                     if (i == origin.x - 1 && j == origin.y - 1 ||
                         i == origin.x - 1 && j == origin.y + puyo.Shape.y ||
                         i == origin.x + puyo.Shape.x && j == origin.y - 1 ||
                         i == origin.x + puyo.Shape.x && j == origin.y + puyo.Shape.y) { continue; }
-                    if (outList.Contains((Vector2Int)_coord[i, j])) { continue; }
-                    outList.Add((Vector2Int)_coord[i, j]);
+                    if (outList.Contains((Vector2Int)m_Coord[i, j])) { continue; }
+                    outList.Add((Vector2Int)m_Coord[i, j]);
                 }
             }
 
