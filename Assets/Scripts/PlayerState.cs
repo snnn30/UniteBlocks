@@ -3,13 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using Board;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using Items;
 using UnityEngine;
 
-namespace Player
+namespace UniteBlocks
 {
     public enum Direction
     {
@@ -58,10 +56,10 @@ namespace Player
                 return;
             }
 
-            Destroy(((Puyo)_items[0]).transform.GetChild(0).gameObject);
+            Destroy(((Block)_items[0]).transform.GetChild(0).gameObject);
 
-            _boardController.Settle(Position, (Puyo)_items[0]);
-            _boardController.Settle(CalcChildPuyoPos(Position, Rotation), (Puyo)_items[1]);
+            _boardController.Settle(Position, (Block)_items[0]);
+            _boardController.Settle(CalcChildPuyoPos(Position, Rotation), (Block)_items[1]);
 
             bool gameOver = await _boardController.DropToBottom();
             if (gameOver) { return; }
@@ -101,8 +99,8 @@ namespace Player
             }
             else
             {
-                Puyo parent = (Puyo)_items[0];
-                Puyo child = (Puyo)_items[1];
+                Block parent = (Block)_items[0];
+                Block child = (Block)_items[1];
                 parent.transform.position = this.transform.position;
                 child.transform.position = this.transform.position + Vector3.up;
                 parent.transform.parent = this.transform;

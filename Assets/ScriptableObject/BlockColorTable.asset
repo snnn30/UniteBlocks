@@ -9,8 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f743de997ba25f14a8fa11dd5a18f8e1, type: 3}
-  m_Name: BombGaugeSetting
+  m_Script: {fileID: 11500000, guid: a927bbfd4f925f640bf169d64de043ec, type: 3}
+  m_Name: BlockColorTable
   m_EditorClassIdentifier: 
-  m_IncreasePerSec: 0.03
-  m_BoostRatio: 1.1
+  m_Colors:
+  - {r: 1, g: 0, b: 0, a: 1}
+  - {r: 0, g: 0.23184752, b: 1, a: 1}
+  - {r: 0.13181043, g: 1, b: 0, a: 1}
+  - {r: 1, g: 0.8768307, b: 0, a: 1}

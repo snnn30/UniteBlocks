@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6633985831057067969}
   - component: {fileID: 6231991037331609025}
   m_Layer: 0
-  m_Name: PuyoMask
+  m_Name: BlockMask
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

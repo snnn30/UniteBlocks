@@ -2,24 +2,33 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Items;
 using UnityEngine;
 
-namespace Board
+namespace UniteBlocks
 {
     public class WaitingItems : MonoBehaviour
     {
-        Puyo[] _puyos = new Puyo[2];
-        [SerializeField] Puyo _prefabPuyo;
-        [SerializeField] Bomb _prefabBomb;
-        [SerializeField] WaitingBomb _waitingBomb;
-        [SerializeField] SpriteMask _prefabPuyoMask;
+        Block[] m_Blocks = new Block[2];
+        [SerializeField] Block m_PrefabBlock;
+        [SerializeField] Bomb m_PrefabBomb;
+        [SerializeField] WaitingBomb m_WaitingBomb;
+        [SerializeField] SpriteMask m_PrefabBlockMask;
+        [SerializeField] BlockColorTable m_BlockColorTable;
 
-
-
-        public (Item[] items, bool _isBomb) GetNextItems()
+        private void Awake()
         {
-            if (_waitingBomb.IsActive)
+            // 位置調整用に作っているエディタ上のオブジェクトを破棄
+            foreach (Transform n in this.transform)
+            {
+                GameObject.Destroy(n.gameObject);
+            }
+
+            m_Blocks = GenerateBlocks();
+        }
+
+        public (Item[] items, bool isBomb) GetNextItems()
+        {
+            if (m_WaitingBomb.IsActive)
             {
                 Bomb bomb = GenerateBomb();
                 Item[] items = { bomb, null };
@@ -27,46 +36,34 @@ namespace Board
             }
             else
             {
-                Item[] items = _puyos;
-                _puyos = GeneratePuyos();
+                Item[] items = m_Blocks;
+                m_Blocks = GenerateBlocks();
                 return (items, false);
             }
         }
 
-
-
-        Puyo[] GeneratePuyos()
+        Block[] GenerateBlocks()
         {
-            Puyo[] returnPuyos = new Puyo[2];
+            Block[] returnBlocks = new Block[2];
 
-            returnPuyos[0] = Instantiate(_prefabPuyo, transform);
-            returnPuyos[1] = Instantiate(_prefabPuyo, transform);
-            returnPuyos[1].transform.SetPositionAndRotation(transform.position + Vector3.up, Quaternion.identity);
+            returnBlocks[0] = Instantiate(m_PrefabBlock, transform);
+            returnBlocks[1] = Instantiate(m_PrefabBlock, transform);
+            returnBlocks[1].transform.SetPositionAndRotation(transform.position + Vector3.up, Quaternion.identity);
 
-            int len = System.Enum.GetValues(typeof(PuyoType)).Length;
-            returnPuyos[0].PuyoType = (PuyoType)Random.Range(1, len);
-            returnPuyos[1].PuyoType = (PuyoType)Random.Range(1, len);
+            int len = m_BlockColorTable.Colors.Count;
+            returnBlocks[0].Color = m_BlockColorTable.Colors[Random.Range(0, len)];
+            returnBlocks[1].Color = m_BlockColorTable.Colors[Random.Range(0, len)];
 
-            Instantiate(_prefabPuyoMask, returnPuyos[0].transform);
+            Instantiate(m_PrefabBlockMask, returnBlocks[0].transform);
 
-            return returnPuyos;
+            return returnBlocks;
         }
 
         Bomb GenerateBomb()
         {
-            _waitingBomb.UseGauge();
-            Bomb returnBomb = Instantiate(_prefabBomb, transform);
+            m_WaitingBomb.UseGauge();
+            Bomb returnBomb = Instantiate(m_PrefabBomb, transform);
             return returnBomb;
-        }
-
-        private void Awake()
-        {
-            foreach (Transform n in this.transform)
-            {
-                GameObject.Destroy(n.gameObject);
-            }
-
-            _puyos = GeneratePuyos();
         }
 
     }

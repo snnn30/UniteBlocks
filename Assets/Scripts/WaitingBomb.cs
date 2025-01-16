@@ -3,54 +3,80 @@
 // See the LICENSE file in the project root for more information.
 
 using Manager;
-using Player;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Utility;
 
-namespace Board
+namespace UniteBlocks
 {
     public class WaitingBomb : MonoBehaviour
     {
-        [SerializeField] PlayerInput _input;
-        [SerializeField] ChainGauge _gauge;
-        [SerializeField] BombGaugeSetting _gaugeSetting;
-        [SerializeField] PlayerSetting _playerSetting;
-        [SerializeField] GameManager _gameManager;
-        Material _material;
-        bool _isActive;
         public bool IsActive
         {
-            get { return _isActive; }
+            get { return b_IsActive; }
             private set
             {
-                _isActive = value;
+                b_IsActive = value;
                 if (value)
                 {
                     SetActiveColor();
-                    void SetActiveColor()
-                    {
-                        Color beforeColor = _material.color;
-                        Color afterColor = new Color(beforeColor.r, beforeColor.g, beforeColor.b, 1f);
-                        _material.color = afterColor;
-                    }
                 }
                 else
                 {
                     SetInactiveColor();
-                    void SetInactiveColor()
-                    {
-                        Color beforeColor = _material.color;
-                        Color afterColor = new Color(beforeColor.r, beforeColor.g, beforeColor.b, 0.3f);
-                        _material.color = afterColor;
-                    }
                 }
             }
         }
 
         public bool IsBoosting { get; set; } = false;
 
+        [SerializeField]
+        PlayerInput m_Input;
 
+        [SerializeField]
+        ChainGauge m_Gauge;
+
+        [SerializeField]
+        BombGaugeSetting m_GaugeSetting;
+
+        [SerializeField]
+        PlayerSetting m_PlayerSetting;
+
+        [SerializeField]
+        GameManager m_GameManager;
+
+        Material m_Material;
+
+        bool b_IsActive;
+
+        private void Awake()
+        {
+            m_Material = GetComponent<SpriteRenderer>().material;
+            m_Gauge.Value = 0f;
+            IsActive = false;
+        }
+
+        private void OnEnable()
+        {
+            m_Input.actions["Swap"].performed += OnSwapPerformed;
+        }
+
+        private void OnDisable()
+        {
+            m_Input.actions["Swap"].performed -= OnSwapPerformed;
+        }
+
+        private void Update()
+        {
+            if (!m_GameManager.IsGaugeIncreasing) { return; }
+            float boost = 1f;
+            if (IsBoosting)
+            {
+                boost *= m_PlayerSetting.AutoDropDelay / m_PlayerSetting.ManualDropDelay;
+                boost *= m_GaugeSetting.BoostRatio;
+            }
+            m_Gauge.Value += Time.deltaTime * m_GaugeSetting.IncreasePerSec * boost;
+        }
 
         void OnSwapPerformed(InputAction.CallbackContext context)
         {
@@ -58,7 +84,7 @@ namespace Board
             {
                 IsActive = false;
             }
-            else if (_gauge.Value >= 1f)
+            else if (m_Gauge.Value >= 1f)
             {
                 IsActive = true;
             }
@@ -66,40 +92,22 @@ namespace Board
 
         public void UseGauge()
         {
-            _gauge.Value -= 1f;
+            m_Gauge.Value -= 1f;
             IsActive = false;
         }
 
-
-
-        private void Awake()
+        void SetActiveColor()
         {
-            _material = GetComponent<SpriteRenderer>().material;
-            _gauge.Value = 0f;
-            IsActive = false;
+            Color beforeColor = m_Material.color;
+            Color afterColor = new Color(beforeColor.r, beforeColor.g, beforeColor.b, 1f);
+            m_Material.color = afterColor;
         }
 
-        private void OnEnable()
+        void SetInactiveColor()
         {
-            _input.actions["Swap"].performed += OnSwapPerformed;
+            Color beforeColor = m_Material.color;
+            Color afterColor = new Color(beforeColor.r, beforeColor.g, beforeColor.b, 0.3f);
+            m_Material.color = afterColor;
         }
-
-        private void OnDisable()
-        {
-            _input.actions["Swap"].performed -= OnSwapPerformed;
-        }
-
-        private void Update()
-        {
-            if (!_gameManager.IsGaugeIncreasing) { return; }
-            float boost = 1f;
-            if (IsBoosting)
-            {
-                boost *= _playerSetting.AutoDropDelay / _playerSetting.ManualDropDelay;
-                boost *= _gaugeSetting.BoostRatio;
-            }
-            _gauge.Value += Time.deltaTime * _gaugeSetting.IncreasePerSec * boost;
-        }
-
     }
 }

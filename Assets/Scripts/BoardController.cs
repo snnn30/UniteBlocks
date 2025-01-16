@@ -5,12 +5,11 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using Items;
 using Manager;
 using Score;
 using UnityEngine;
 
-namespace Board
+namespace UniteBlocks
 {
     public class BoardController : MonoBehaviour
     {
@@ -20,9 +19,9 @@ namespace Board
         public static readonly Vector2Int START_POS = new Vector2Int(2, 12);
         // public static readonly int MAX_HEIGHT = 11;
         Vector2Int?[,] _coord = new Vector2Int?[BOARD_WIDTH, BOARD_HEIGHT];
-        Puyo[,] _origins = new Puyo[BOARD_WIDTH, BOARD_HEIGHT];
+        Block[,] _origins = new Block[BOARD_WIDTH, BOARD_HEIGHT];
 
-        [SerializeField] Puyo _prefabPuyo;
+        [SerializeField] Block _prefabPuyo;
         [SerializeField] GameObject _puyosContainer;
         [SerializeField] GameManager _gameManager;
         [SerializeField] ScoreManager _scoreManager;
@@ -57,7 +56,7 @@ namespace Board
         /// <summary>
         /// アイテムがおけるかを検証
         /// </summary>
-        public bool CanSettle(Vector2Int pos, Puyo puyo)
+        public bool CanSettle(Vector2Int pos, Block puyo)
         {
             for (int x = pos.x; x < pos.x + puyo.Shape.x; x++)
             {
@@ -80,7 +79,7 @@ namespace Board
         /// <summary>
         /// アイテムを置く
         /// </summary>
-        public void Settle(Vector2Int pos, Puyo puyo)
+        public void Settle(Vector2Int pos, Block puyo)
         {
             if (!CanSettle(pos, puyo))
             {
@@ -249,7 +248,7 @@ namespace Board
                     bool CheckInRange(int x0, int y0, int x1, int y1, ref List<Vector2Int> deletePuyos)
                     {
                         if (x0 == x1 || y0 == y1) { return false; }
-                        PuyoType type = _origins[x0, y0].PuyoType;
+                        Color type = _origins[x0, y0].Color;
                         List<Vector2Int> origins = new List<Vector2Int>();
 
                         for (int i = x0; i <= x1; i++)
@@ -265,8 +264,8 @@ namespace Board
 
                         foreach (Vector2Int pos in origins)
                         {
-                            Puyo target = _origins[pos.x, pos.y];
-                            if (target.PuyoType != type) { return false; }
+                            Block target = _origins[pos.x, pos.y];
+                            if (target.Color != type) { return false; }
                             if (pos.x < x0 || pos.y < y0) { return false; }
                             if (pos.x + target.Shape.x - 1 > x1 || pos.y + target.Shape.y - 1 > y1) { return false; }
                         }
@@ -295,7 +294,7 @@ namespace Board
             if (_coord[pos.x, pos.y] == null) { return; }
 
             Vector2Int origin = (Vector2Int)_coord[pos.x, pos.y];
-            PuyoType type = _origins[origin.x, origin.y].PuyoType;
+            Color type = _origins[origin.x, origin.y].Color;
 
             List<List<Vector2Int>> origins = new List<List<Vector2Int>>();
             origins.Add(new List<Vector2Int> { origin });
@@ -319,7 +318,7 @@ namespace Board
                         if (_coord[target.x, target.y] == null) { continue; }
                         Vector2Int targetOrigin = (Vector2Int)_coord[target.x, target.y];
 
-                        if (_origins[targetOrigin.x, targetOrigin.y].PuyoType != type) continue;
+                        if (_origins[targetOrigin.x, targetOrigin.y].Color != type) continue;
                         bool isContinue = false;
                         foreach (var list in origins)
                         {
@@ -390,7 +389,7 @@ namespace Board
         List<Vector2Int> GetTouchingPuyo(Vector2Int origin)
         {
             List<Vector2Int> outList = new List<Vector2Int>();
-            Puyo puyo = _origins[origin.x, origin.y];
+            Block puyo = _origins[origin.x, origin.y];
 
             for (int i = origin.x - 1; i < origin.x + puyo.Shape.x + 1; i++)
             {

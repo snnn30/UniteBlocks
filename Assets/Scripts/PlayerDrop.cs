@@ -3,106 +3,34 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Threading;
-using Board;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Manager;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace Player
+namespace UniteBlocks
 {
     public class PlayerDrop : MonoBehaviour
     {
-        [SerializeField] WaitingBomb _waitingBomb;
-        [SerializeField] GameManager _gameManager;
-        float _dropDelay;
-        PlayerInput _input;
-        PlayerState _state;
-        CancellationTokenSource _cancellationTokenSource;
-        PlayerSetting _setting;
+        [SerializeField]
+        WaitingBomb m_WaitingBomb;
 
+        [SerializeField]
+        GameManager m_GameManager;
 
-        async UniTask Drop()
-        {
-            Vector2Int targetPos = _state.Position + Vector2Int.down;
-
-            if (!_state.IsAcceptingInput) { return; }
-
-            if (!_state.CanSet(targetPos, _state.Rotation))
-            {
-                _gameManager.IsGaugeIncreasing = false;
-                await _state.GroundingProcess();
-                await StartDrop();
-                return;
-            }
-
-            Vector3 vec3 = Vector3.down;
-            Tween tween = this.transform
-                .DOBlendableLocalMoveBy(vec3, _dropDelay / 5)
-                .SetEase(Ease.InOutQuad);
-            _state.ActiveTweens.Add(tween);
-            _ = tween.OnKill(() => _state.ActiveTweens.Remove(tween));
-
-            _state.Position = targetPos;
-        }
-
-        void OnDropPerformed(InputAction.CallbackContext context)
-        {
-            if (_cancellationTokenSource != null)
-            {
-                _cancellationTokenSource.Cancel();
-                _cancellationTokenSource.Dispose();
-                _cancellationTokenSource = null;
-            }
-            _cancellationTokenSource = new CancellationTokenSource();
-
-            if (_state.IsAcceptingInput) { _gameManager.IsGaugeIncreasing = true; }
-            _waitingBomb.IsBoosting = true;
-            _dropDelay = _setting.ManualDropDelay;
-
-            DropContinuous(_cancellationTokenSource.Token).Forget();
-        }
-
-        void OnDropCanceled(InputAction.CallbackContext context)
-        {
-            _waitingBomb.IsBoosting = false;
-            _dropDelay = _setting.AutoDropDelay;
-        }
-
+        float m_DropDelay;
+        PlayerInput m_Input;
+        PlayerState m_State;
+        CancellationTokenSource m_CancellationTokenSource;
+        PlayerSetting m_Setting;
 
         private void Awake()
         {
-            _input = GetComponent<PlayerInput>();
-            _state = GetComponent<PlayerState>();
-            _setting = _state.PlayerSetting;
-            _dropDelay = _setting.AutoDropDelay;
-        }
-
-        async UniTask StartDrop()
-        {
-            if (_cancellationTokenSource != null)
-            {
-                _cancellationTokenSource.Cancel();
-                _cancellationTokenSource.Dispose();
-                _cancellationTokenSource = null;
-            }
-            _cancellationTokenSource = new CancellationTokenSource();
-            _gameManager.IsGaugeIncreasing = false;
-
-            await UniTask.WaitForSeconds(_setting.StagnationTime, cancellationToken: _cancellationTokenSource.Token);
-
-            if (_state.IsAcceptingInput) { _gameManager.IsGaugeIncreasing = true; }
-            DropContinuous(_cancellationTokenSource.Token).Forget();
-        }
-
-        async UniTask DropContinuous(CancellationToken token)
-        {
-            while (true)
-            {
-                await Drop();
-                await UniTask.WaitForSeconds(_dropDelay, cancellationToken: token);
-            }
+            m_Input = GetComponent<PlayerInput>();
+            m_State = GetComponent<PlayerState>();
+            m_Setting = m_State.PlayerSetting;
+            m_DropDelay = m_Setting.AutoDropDelay;
         }
 
         private void Start()
@@ -112,24 +40,97 @@ namespace Player
 
         private void OnDestroy()
         {
-            if (_cancellationTokenSource != null)
+            if (m_CancellationTokenSource != null)
             {
-                _cancellationTokenSource.Cancel();
-                _cancellationTokenSource.Dispose();
-                _cancellationTokenSource = null;
+                m_CancellationTokenSource.Cancel();
+                m_CancellationTokenSource.Dispose();
+                m_CancellationTokenSource = null;
             }
         }
 
         private void OnEnable()
         {
-            _input.actions["Drop"].performed += OnDropPerformed;
-            _input.actions["Drop"].canceled += OnDropCanceled;
+            m_Input.actions["Drop"].performed += OnDropPerformed;
+            m_Input.actions["Drop"].canceled += OnDropCanceled;
         }
 
         private void OnDisable()
         {
-            _input.actions["Drop"].performed -= OnDropPerformed;
-            _input.actions["Drop"].canceled -= OnDropCanceled;
+            m_Input.actions["Drop"].performed -= OnDropPerformed;
+            m_Input.actions["Drop"].canceled -= OnDropCanceled;
+        }
+
+        async UniTask Drop()
+        {
+            Vector2Int targetPos = m_State.Position + Vector2Int.down;
+
+            if (!m_State.IsAcceptingInput) { return; }
+
+            if (!m_State.CanSet(targetPos, m_State.Rotation))
+            {
+                m_GameManager.IsGaugeIncreasing = false;
+                await m_State.GroundingProcess();
+                await StartDrop();
+                return;
+            }
+
+            Vector3 vec3 = Vector3.down;
+            Tween tween = this.transform
+                .DOBlendableLocalMoveBy(vec3, m_DropDelay / 5)
+                .SetEase(Ease.InOutQuad);
+            m_State.ActiveTweens.Add(tween);
+            _ = tween.OnKill(() => m_State.ActiveTweens.Remove(tween));
+
+            m_State.Position = targetPos;
+        }
+
+        void OnDropPerformed(InputAction.CallbackContext context)
+        {
+            if (m_CancellationTokenSource != null)
+            {
+                m_CancellationTokenSource.Cancel();
+                m_CancellationTokenSource.Dispose();
+                m_CancellationTokenSource = null;
+            }
+            m_CancellationTokenSource = new CancellationTokenSource();
+
+            if (m_State.IsAcceptingInput) { m_GameManager.IsGaugeIncreasing = true; }
+            m_WaitingBomb.IsBoosting = true;
+            m_DropDelay = m_Setting.ManualDropDelay;
+
+            DropContinuous(m_CancellationTokenSource.Token).Forget();
+        }
+
+        void OnDropCanceled(InputAction.CallbackContext context)
+        {
+            m_WaitingBomb.IsBoosting = false;
+            m_DropDelay = m_Setting.AutoDropDelay;
+        }
+
+        async UniTask StartDrop()
+        {
+            if (m_CancellationTokenSource != null)
+            {
+                m_CancellationTokenSource.Cancel();
+                m_CancellationTokenSource.Dispose();
+                m_CancellationTokenSource = null;
+            }
+            m_CancellationTokenSource = new CancellationTokenSource();
+            m_GameManager.IsGaugeIncreasing = false;
+
+            await UniTask.WaitForSeconds(m_Setting.StagnationTime, cancellationToken: m_CancellationTokenSource.Token);
+
+            if (m_State.IsAcceptingInput) { m_GameManager.IsGaugeIncreasing = true; }
+            DropContinuous(m_CancellationTokenSource.Token).Forget();
+        }
+
+        async UniTask DropContinuous(CancellationToken token)
+        {
+            while (true)
+            {
+                await Drop();
+                await UniTask.WaitForSeconds(m_DropDelay, cancellationToken: token);
+            }
         }
     }
 }

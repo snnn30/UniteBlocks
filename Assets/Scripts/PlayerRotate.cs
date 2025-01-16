@@ -5,24 +5,50 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using Items;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace Player
+namespace UniteBlocks
 {
     public class PlayerRotate : MonoBehaviour
     {
-        PlayerInput _input;
-        PlayerState _state;
-        CancellationTokenSource _cancellationTokenSource;
-        PlayerSetting _setting;
+        PlayerInput m_Input;
+        PlayerState m_State;
+        CancellationTokenSource m_CancellationTokenSource;
+        PlayerSetting m_Setting;
 
+        private void Awake()
+        {
+            m_Input = GetComponent<PlayerInput>();
+            m_State = GetComponent<PlayerState>();
+            m_Setting = m_State.PlayerSetting;
+        }
 
+        private void OnDestroy()
+        {
+            if (m_CancellationTokenSource != null)
+            {
+                m_CancellationTokenSource.Cancel();
+                m_CancellationTokenSource.Dispose();
+                m_CancellationTokenSource = null;
+            }
+        }
+
+        private void OnEnable()
+        {
+            m_Input.actions["Rotate"].performed += OnRotatePerformed;
+            m_Input.actions["Rotate"].canceled += OnRotateCanceled;
+        }
+
+        private void OnDisable()
+        {
+            m_Input.actions["Rotate"].performed -= OnRotatePerformed;
+            m_Input.actions["Rotate"].canceled -= OnRotateCanceled;
+        }
 
         bool Rotate(float value)
         {
-            if (_state.IsBomb) { return true; }
+            if (m_State.IsBomb) { return true; }
 
             var isRight = (value < 0) ? false : true;
             Direction targetRot;
@@ -30,21 +56,21 @@ namespace Player
 
             if (isRight)
             {
-                targetRot = (Direction)((int)(_state.Rotation + 1) % 4);
+                targetRot = (Direction)((int)(m_State.Rotation + 1) % 4);
                 targetAmount = -90;
             }
             else
             {
-                targetRot = (Direction)((int)(_state.Rotation + 3) % 4);
+                targetRot = (Direction)((int)(m_State.Rotation + 3) % 4);
                 targetAmount = 90;
             }
 
-            if (!_state.IsAcceptingInput) { return false; }
-            if (!_state.CanSet(_state.Position, targetRot)) { return false; }
+            if (!m_State.IsAcceptingInput) { return false; }
+            if (!m_State.CanSet(m_State.Position, targetRot)) { return false; }
 
             float currentAngle = 0;
-            var parentPuyo = (Puyo)_state.Items[0];
-            var childPuyo = (Puyo)_state.Items[1];
+            var parentPuyo = (Block)m_State.Items[0];
+            var childPuyo = (Block)m_State.Items[1];
 
             var tween = DOTween.To(
                 () => 0f,
@@ -58,20 +84,20 @@ namespace Player
                     currentAngle = x;
                 },
                 targetAmount,
-                _setting.RotateDelay
+                m_Setting.RotateDelay
                 ).SetEase(Ease.OutQuad);
 
-            _state.ActiveTweens.Add(tween);
-            tween.OnKill(() => _state.ActiveTweens.Remove(tween));
+            m_State.ActiveTweens.Add(tween);
+            tween.OnKill(() => m_State.ActiveTweens.Remove(tween));
 
-            _state.Rotation = targetRot;
+            m_State.Rotation = targetRot;
             return true;
         }
 
         void OnRotatePerformed(InputAction.CallbackContext context)
         {
-            _cancellationTokenSource = new CancellationTokenSource();
-            RotateContinuous(_cancellationTokenSource.Token).Forget();
+            m_CancellationTokenSource = new CancellationTokenSource();
+            RotateContinuous(m_CancellationTokenSource.Token).Forget();
             async UniTask RotateContinuous(CancellationToken token)
             {
                 while (true)
@@ -84,43 +110,13 @@ namespace Player
 
         void OnRotateCanceled(InputAction.CallbackContext context)
         {
-            if (_cancellationTokenSource != null)
+            if (m_CancellationTokenSource != null)
             {
-                _cancellationTokenSource.Cancel();
-                _cancellationTokenSource.Dispose();
-                _cancellationTokenSource = null;
+                m_CancellationTokenSource.Cancel();
+                m_CancellationTokenSource.Dispose();
+                m_CancellationTokenSource = null;
             }
 
         }
-
-        private void OnDestroy()
-        {
-            if (_cancellationTokenSource != null)
-            {
-                _cancellationTokenSource.Cancel();
-                _cancellationTokenSource.Dispose();
-                _cancellationTokenSource = null;
-            }
-        }
-
-        private void Awake()
-        {
-            _input = GetComponent<PlayerInput>();
-            _state = GetComponent<PlayerState>();
-            _setting = _state.PlayerSetting;
-        }
-
-        private void OnEnable()
-        {
-            _input.actions["Rotate"].performed += OnRotatePerformed;
-            _input.actions["Rotate"].canceled += OnRotateCanceled;
-        }
-
-        private void OnDisable()
-        {
-            _input.actions["Rotate"].performed -= OnRotatePerformed;
-            _input.actions["Rotate"].canceled -= OnRotateCanceled;
-        }
-
     }
 }

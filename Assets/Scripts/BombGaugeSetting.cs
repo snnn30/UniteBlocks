@@ -4,15 +4,15 @@
 
 using UnityEngine;
 
-namespace Board
+namespace UniteBlocks
 {
     [CreateAssetMenu(menuName = "ScriptableObject/BombGaugeSetting")]
     public class BombGaugeSetting : ScriptableObject
     {
-        [SerializeField] float _increasePerSec;
-        [SerializeField, Range(1f, 5f)] float _boostRatio;
+        [SerializeField] float m_IncreasePerSec;
+        [SerializeField, Range(1f, 5f)] float m_BoostRatio;
 
-        public float IncreasePerSec => _increasePerSec;
-        public float BoostRatio => _boostRatio;
+        public float IncreasePerSec => m_IncreasePerSec;
+        public float BoostRatio => m_BoostRatio;
     }
 }
