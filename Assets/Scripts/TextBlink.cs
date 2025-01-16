@@ -5,27 +5,29 @@
 using TMPro;
 using UnityEngine;
 
-public class TextBlink : MonoBehaviour
+namespace Utility
 {
-    TextMeshProUGUI r_text;
-    [SerializeField] float r_cycle;
-    float _time;
-
-
-    private void Awake()
+    public class TextBlink : MonoBehaviour
     {
-        r_text = GetComponent<TextMeshProUGUI>();
-    }
+        [SerializeField]
+        private float m_Cycle;
 
-    private void Update()
-    {
-        _time += Time.unscaledDeltaTime;
-        _time %= r_cycle;
+        private TextMeshProUGUI m_Text;
+        private float m_Time;
 
-        float val = _time / r_cycle;
-        val = Mathf.Lerp(0f, Mathf.PI * 2f, val);
-        r_text.alpha = (1f + Mathf.Sin(val)) / 2f;
+        private void Awake()
+        {
+            m_Text = GetComponent<TextMeshProUGUI>();
+        }
 
+        private void Update()
+        {
+            m_Time += Time.unscaledDeltaTime;
+            m_Time %= m_Cycle;
 
+            float val = m_Time / m_Cycle;
+            val = Mathf.Lerp(0f, Mathf.PI * 2f, val);
+            m_Text.alpha = (1f + Mathf.Sin(val)) / 2f;
+        }
     }
 }

@@ -8,22 +8,26 @@ namespace Utility
 {
     public class UIShake : MonoBehaviour
     {
-        private RectTransform rectTransform;
-        private Vector3 originalPosition;
-        [SerializeField] private float shakeAmount = 5f;
-        [SerializeField] private float shakeSpeed = 10f;
+        private RectTransform m_RectTransform;
+        private Vector3 m_OriginalPosition;
+
+        [SerializeField]
+        private float m_ShakeAmount = 3f;
+
+        [SerializeField]
+        private float m_ShakeSpeed = 5f;
 
         private void Awake()
         {
-            rectTransform = GetComponent<RectTransform>();
-            originalPosition = rectTransform.localPosition;
+            m_RectTransform = GetComponent<RectTransform>();
+            m_OriginalPosition = m_RectTransform.localPosition;
         }
 
         private void Update()
         {
-            float shakeX = Mathf.PerlinNoise(Time.time * shakeSpeed, 0) * shakeAmount;
-            float shakeY = Mathf.PerlinNoise(0, Time.time * shakeSpeed) * shakeAmount;
-            rectTransform.localPosition = originalPosition + new Vector3(shakeX, shakeY, 0);
+            float shakeX = Mathf.PerlinNoise(Time.time * m_ShakeSpeed, 0) * m_ShakeAmount;
+            float shakeY = Mathf.PerlinNoise(0, Time.time * m_ShakeSpeed) * m_ShakeAmount;
+            m_RectTransform.localPosition = m_OriginalPosition + new Vector3(shakeX, shakeY, 0);
         }
     }
 }

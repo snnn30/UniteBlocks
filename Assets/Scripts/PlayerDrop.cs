@@ -5,7 +5,6 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using Manager;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -14,16 +13,16 @@ namespace UniteBlocks
     public class PlayerDrop : MonoBehaviour
     {
         [SerializeField]
-        WaitingBomb m_WaitingBomb;
+        private WaitingBomb m_WaitingBomb;
 
         [SerializeField]
-        GameManager m_GameManager;
+        private GameManager m_GameManager;
 
-        float m_DropDelay;
-        PlayerInput m_Input;
-        PlayerState m_State;
-        CancellationTokenSource m_CancellationTokenSource;
-        PlayerSetting m_Setting;
+        private float m_DropDelay;
+        private PlayerInput m_Input;
+        private PlayerState m_State;
+        private CancellationTokenSource m_CancellationTokenSource;
+        private PlayerSetting m_Setting;
 
         private void Awake()
         {

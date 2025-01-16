@@ -6,29 +6,35 @@ using TMPro;
 using UnityEngine;
 using Utility;
 
-namespace Score
+namespace UniteBlocks
 {
     public class DistanceUI : MonoBehaviour
     {
-        [SerializeField] CircleGauge _circle;
-        [SerializeField] TextMeshProUGUI _text;
-        [SerializeField] float _minScale;
-        uint _value;
-
         public uint Threshold { get; set; }
         public uint Value
         {
-            get { return _value; }
+            get { return b_Value; }
             set
             {
                 if (value < 0) { value = 0; }
-                _value = value;
-                _text.text = value.ToString();
+                b_Value = value;
+                m_Text.text = value.ToString();
 
                 if (value > Threshold) { value = Threshold; }
                 float scale = Mathf.InverseLerp(Threshold, 0, value);
-                _circle.Value = Mathf.Lerp(_minScale, 1, scale);
+                m_Circle.Value = Mathf.Lerp(m_MinScale, 1, scale);
             }
         }
+
+        [SerializeField]
+        private CircleGauge m_Circle;
+
+        [SerializeField]
+        private TextMeshProUGUI m_Text;
+
+        [SerializeField]
+        private float m_MinScale;
+
+        private uint b_Value;
     }
 }

@@ -12,10 +12,10 @@ namespace UniteBlocks
 {
     public class PlayerRotate : MonoBehaviour
     {
-        PlayerInput m_Input;
-        PlayerState m_State;
-        CancellationTokenSource m_CancellationTokenSource;
-        PlayerSetting m_Setting;
+        private PlayerInput m_Input;
+        private PlayerState m_State;
+        private CancellationTokenSource m_CancellationTokenSource;
+        private PlayerSetting m_Setting;
 
         private void Awake()
         {

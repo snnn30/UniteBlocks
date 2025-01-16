@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Manager;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Utility;
@@ -31,23 +30,23 @@ namespace UniteBlocks
         public bool IsBoosting { get; set; } = false;
 
         [SerializeField]
-        PlayerInput m_Input;
+        private PlayerInput m_Input;
 
         [SerializeField]
-        ChainGauge m_Gauge;
+        private ChainGauge m_Gauge;
 
         [SerializeField]
-        BombGaugeSetting m_GaugeSetting;
+        private BombGaugeSetting m_GaugeSetting;
 
         [SerializeField]
-        PlayerSetting m_PlayerSetting;
+        private PlayerSetting m_PlayerSetting;
 
         [SerializeField]
-        GameManager m_GameManager;
+        private GameManager m_GameManager;
 
-        Material m_Material;
+        private Material m_Material;
 
-        bool b_IsActive;
+        private bool b_IsActive;
 
         private void Awake()
         {

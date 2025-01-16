@@ -4,16 +4,34 @@
 
 using UnityEngine;
 
-namespace Score
+namespace UniteBlocks
 {
     [CreateAssetMenu(menuName = "ScriptableObject/DistanceSetting")]
     public class DistanceSetting : ScriptableObject
     {
-        public float decreasePerSecond;
-        public uint initialValue;
-        public float timeToReach;
-        public float acceleration;
-        public float reflexTime;
-        public float reflexTimeScale;
+        public float DecreasePerSecond => m_DecreasePerSecond;
+        public uint InitialValue => m_InitialValue;
+        public float TimeToReach => m_TimeToReach;
+        public float Acceleration => m_Acceleration;
+        public float ReflexTime => m_ReflexTime;
+        public float ReflexTimeScale => m_ReflexTimeScale;
+
+        [SerializeField]
+        private float m_DecreasePerSecond;
+
+        [SerializeField]
+        private uint m_InitialValue;
+
+        [SerializeField]
+        private float m_TimeToReach;
+
+        [SerializeField]
+        private float m_Acceleration;
+
+        [SerializeField]
+        private float m_ReflexTime;
+
+        [SerializeField]
+        private float m_ReflexTimeScale;
     }
 }

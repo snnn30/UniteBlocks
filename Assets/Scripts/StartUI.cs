@@ -5,12 +5,16 @@
 using TMPro;
 using UnityEngine;
 
-public class StartUI : MonoBehaviour
+namespace UniteBlocks
 {
-    [SerializeField] TextMeshProUGUI r_pressAnyKey;
-
-    public void SetVisilityPressAnyKey(bool visible)
+    public class StartUI : MonoBehaviour
     {
-        r_pressAnyKey.gameObject.SetActive(visible);
+        [SerializeField]
+        private TextMeshProUGUI m_PressAnyKey;
+
+        public void SetVisilityPressAnyKey(bool visible)
+        {
+            m_PressAnyKey.gameObject.SetActive(visible);
+        }
     }
 }

@@ -13,10 +13,10 @@ namespace UniteBlocks
 {
     public class PlayerMove : MonoBehaviour
     {
-        PlayerInput m_Input;
-        PlayerState m_State;
-        CancellationTokenSource m_CancellationTokenSource;
-        PlayerSetting _setting;
+        private PlayerInput m_Input;
+        private PlayerState m_State;
+        private CancellationTokenSource m_CancellationTokenSource;
+        private PlayerSetting _setting;
 
         private void Awake()
         {

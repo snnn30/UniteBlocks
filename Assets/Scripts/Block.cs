@@ -35,12 +35,12 @@ namespace UniteBlocks
         }
 
         [SerializeField]
-        BlockColorTable m_BlockColorTable;
+        private BlockColorTable m_BlockColorTable;
 
-        SpriteRenderer m_Renderer;
+        private SpriteRenderer m_Renderer;
 
-        Color b_Color;
-        Vector2Int b_Shape;
+        private Color b_Color;
+        private Vector2Int b_Shape;
 
 
 

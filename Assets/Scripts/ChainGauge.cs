@@ -9,42 +9,40 @@ namespace Utility
 {
     public class ChainGauge : MonoBehaviour
     {
-        [SerializeField] Slider[] _sliders;
-        float _value;
-
-        Slider[] Sliders => _sliders;
         public float Value
         {
-            get { return _value; }
+            get { return b_Value; }
             set
             {
                 if (value < 0) value = 0;
                 if (value > MaxValue) value = MaxValue;
 
-                _value = value;
+                b_Value = value;
 
-                for (int i = 0; i < Sliders.Length; i++)
+                for (int i = 0; i < m_Sliders.Length; i++)
                 {
-                    if (_value >= i + 1)
+                    if (b_Value >= i + 1)
                     {
-                        Sliders[i].value = Sliders[i].maxValue;
+                        m_Sliders[i].value = m_Sliders[i].maxValue;
                     }
                     else
                     {
-                        Sliders[i].value = _value - i;
+                        m_Sliders[i].value = b_Value - i;
                     }
-
                 }
-
             }
         }
-        public int MaxValue => Sliders.Length;
 
+        public int MaxValue => m_Sliders.Length;
 
+        [SerializeField]
+        private Slider[] m_Sliders;
+
+        private float b_Value;
 
         private void Awake()
         {
-            foreach (var slider in _sliders)
+            foreach (var slider in m_Sliders)
             {
                 slider.maxValue = 1f;
                 slider.minValue = 0f;

@@ -7,54 +7,62 @@ using DG.Tweening;
 using TMPro;
 using UnityEngine;
 
-public class CountDownUI : MonoBehaviour
+namespace UniteBlocks
 {
-    [SerializeField] TextMeshProUGUI _countUI;
-    [SerializeField] int _initialCount;
-    [SerializeField] float _scale;
-    [SerializeField] float _timePer1Count;
-    float _count;
-    float Count
+    public class CountDownUI : MonoBehaviour
     {
-        get { return _count; }
-        set
+        [SerializeField]
+        private TextMeshProUGUI m_CountUI;
+
+        [SerializeField]
+        private int m_InitialCount;
+
+        [SerializeField]
+        private float m_Scale;
+
+        [SerializeField]
+        private float m_TimePer1Count;
+
+        private float Count
         {
-            _count = value;
-            _countUI.text = value.ToString();
+            get { return b_Count; }
+            set
+            {
+                b_Count = value;
+                m_CountUI.text = value.ToString();
+            }
         }
-    }
 
+        private float b_Count;
 
-
-    private void Awake()
-    {
-        Count = _initialCount;
-    }
-
-
-
-    public async UniTask CountDown()
-    {
-        Count = _initialCount;
-        while (Count > 0)
+        private void Awake()
         {
-            var originalScale = _countUI.rectTransform.localScale;
-            var scaleTween = _countUI.rectTransform.DOScale(originalScale * _scale, _timePer1Count).SetEase(Ease.OutCubic).SetUpdate(true);
-            var alphaTween = DOTween.To(
-                () => 1f,
-                x =>
-                {
-                    _countUI.alpha = x;
-                },
-                0f,
-                _timePer1Count
-                ).SetEase(Ease.InCubic).SetUpdate(true);
+            Count = m_InitialCount;
+        }
 
-            await scaleTween;
-            await alphaTween;
+        public async UniTask CountDown()
+        {
+            Count = m_InitialCount;
+            while (Count > 0)
+            {
+                var originalScale = m_CountUI.rectTransform.localScale;
+                var scaleTween = m_CountUI.rectTransform.DOScale(originalScale * m_Scale, m_TimePer1Count).SetEase(Ease.OutCubic).SetUpdate(true);
+                var alphaTween = DOTween.To(
+                    () => 1f,
+                    x =>
+                    {
+                        m_CountUI.alpha = x;
+                    },
+                    0f,
+                    m_TimePer1Count
+                    ).SetEase(Ease.InCubic).SetUpdate(true);
 
-            _countUI.rectTransform.localScale = originalScale;
-            Count--;
+                await scaleTween;
+                await alphaTween;
+
+                m_CountUI.rectTransform.localScale = originalScale;
+                Count--;
+            }
         }
     }
 }

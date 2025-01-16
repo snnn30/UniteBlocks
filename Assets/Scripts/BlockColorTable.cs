@@ -13,6 +13,6 @@ namespace UniteBlocks
         public List<Color> Colors => m_Colors;
 
         [SerializeField]
-        List<Color> m_Colors;
+        private List<Color> m_Colors;
     }
 }

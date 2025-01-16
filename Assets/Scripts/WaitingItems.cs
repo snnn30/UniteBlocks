@@ -8,12 +8,22 @@ namespace UniteBlocks
 {
     public class WaitingItems : MonoBehaviour
     {
-        Block[] m_Blocks = new Block[2];
-        [SerializeField] Block m_PrefabBlock;
-        [SerializeField] Bomb m_PrefabBomb;
-        [SerializeField] WaitingBomb m_WaitingBomb;
-        [SerializeField] SpriteMask m_PrefabBlockMask;
-        [SerializeField] BlockColorTable m_BlockColorTable;
+        private Block[] m_Blocks = new Block[2];
+
+        [SerializeField]
+        private Block m_PrefabBlock;
+
+        [SerializeField]
+        private Bomb m_PrefabBomb;
+
+        [SerializeField]
+        private WaitingBomb m_WaitingBomb;
+
+        [SerializeField]
+        private SpriteMask m_PrefabBlockMask;
+
+        [SerializeField]
+        private BlockColorTable m_BlockColorTable;
 
         private void Awake()
         {

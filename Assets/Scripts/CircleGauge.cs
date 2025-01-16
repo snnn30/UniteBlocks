@@ -9,27 +9,32 @@ namespace Utility
 {
     public class CircleGauge : MonoBehaviour
     {
-        [SerializeField] Image _circle;
-        [SerializeField] Gradient _gradient;
-        RectTransform _rect;
-        float _value;
-
         public float Value
         {
-            get { return _value; }
+            get { return b_Value; }
             set
             {
                 if (value < 0) value = 0;
                 if (value > 1) value = 1;
-                _value = value;
-                _rect.localScale = new Vector3(value, value, 1);
-                _circle.color = _gradient.Evaluate(value);
+                b_Value = value;
+                m_RectTransform.localScale = new Vector3(value, value, 1);
+                m_Circle.color = m_Gradient.Evaluate(value);
             }
         }
 
+        [SerializeField]
+        private Image m_Circle;
+
+        [SerializeField]
+        private Gradient m_Gradient;
+
+        private RectTransform m_RectTransform;
+
+        private float b_Value;
+
         private void Awake()
         {
-            _rect = _circle.GetComponent<RectTransform>();
+            m_RectTransform = m_Circle.GetComponent<RectTransform>();
         }
     }
 }

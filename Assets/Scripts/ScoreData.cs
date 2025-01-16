@@ -7,45 +7,45 @@ using DG.Tweening;
 using TMPro;
 using UnityEngine;
 
-namespace Score
+namespace UniteBlocks
 {
     public class ScoreData : MonoBehaviour
     {
-        [SerializeField] TextMeshProUGUI _constUI;
-        [SerializeField] TextMeshProUGUI _valueUI;
-        [SerializeField] uint _initialValue;
-        uint _value;
-
-        bool IsValid { get; set; } = true;
-        bool IsVisible { get; set; } = false;
-        TextMeshProUGUI ConstUI => _constUI;
-        TextMeshProUGUI ValueUI => _valueUI;
-        uint InitialValue => _initialValue;
         public uint Value
         {
-            get { return _value; }
+            get { return b_Value; }
             set
             {
-                _value = value;
-                _valueUI.text = _value.ToString();
+                b_Value = value;
+                m_ValueUI.text = b_Value.ToString();
             }
         }
 
+        [SerializeField]
+        private TextMeshProUGUI m_ConstUI;
 
-        public void Awake()
+        [SerializeField]
+        private TextMeshProUGUI m_ValueUI;
+
+        [SerializeField]
+        private uint m_InitialValue;
+
+        private uint b_Value;
+        private bool m_IsOperating = false;
+        private bool m_IsVisible = false;
+
+        private void Awake()
         {
-            Value = InitialValue;
+            Value = m_InitialValue;
             SetVisible(false);
         }
 
-
-
         public async UniTask SetValue(uint targetValue, float seconds = 0f, float scale = 1f, Ease ease = Ease.Linear)
         {
-            if (!IsValid) { Debug.LogWarning("無効な状態"); return; }
-            if (!IsVisible) { Debug.LogWarning("表示されていない"); return; }
+            if (m_IsOperating) { Debug.LogWarning("無効な状態"); return; }
+            if (!m_IsVisible) { Debug.LogWarning("表示されていない"); return; }
 
-            IsValid = false;
+            m_IsOperating = true;
 
             var numTween = DOTween.To(
                 () => Value,
@@ -57,22 +57,22 @@ namespace Score
                 seconds
                 ).SetEase(ease);
 
-            Vector3 originalScale = ValueUI.transform.localScale;
+            Vector3 originalScale = m_ValueUI.transform.localScale;
             var scaleTween = DOTween.Sequence()
-              .Append(ValueUI.transform.DOScale(originalScale * scale, seconds / 2f).SetEase(Ease.InOutQuad))
-              .Append(ValueUI.transform.DOScale(originalScale, seconds / 2f).SetEase(Ease.InOutQuad));
+              .Append(m_ValueUI.transform.DOScale(originalScale * scale, seconds / 2f).SetEase(Ease.InOutQuad))
+              .Append(m_ValueUI.transform.DOScale(originalScale, seconds / 2f).SetEase(Ease.InOutQuad));
 
             await numTween;
             await scaleTween;
 
-            IsValid = true;
+            m_IsOperating = false;
         }
 
         public void SetVisible(bool visible)
         {
-            if (ConstUI != null) { ConstUI.gameObject.SetActive(visible); }
-            ValueUI.gameObject.SetActive(visible);
-            IsVisible = visible;
+            if (m_ConstUI != null) { m_ConstUI.gameObject.SetActive(visible); }
+            m_ValueUI.gameObject.SetActive(visible);
+            m_IsVisible = visible;
         }
     }
 }

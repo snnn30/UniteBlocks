@@ -2,51 +2,38 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Manager;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-namespace Score
+namespace UniteBlocks
 {
     public class DistanceManager : MonoBehaviour
     {
-        [SerializeField] DistanceUI r_distanceUI;
-        [SerializeField] DistanceSetting r_distanceSetting;
-        [SerializeField] GameManager r_gameManager;
-        [SerializeField] Volume r_volume;
-        float b_value;
-        float w_decreasePerSecond;
-        ChromaticAberration w_chromaticAberration;
-        LensDistortion w_lensDistortion;
-        float r_lensDistortionInitialIntinsity;
-        float w_timeScale = 1f;
-        bool w_stop = false;
-
         public float Value
         {
-            get { return b_value; }
+            get { return b_Value; }
             set
             {
-                if (w_stop) { return; }
+                if (m_IsStopping) { return; }
 
                 if (value <= 0.0f)
                 {
-                    w_stop = true;
-                    r_gameManager.GameOver();
+                    m_IsStopping = true;
+                    m_GameManager.GameOver();
                     return;
                 }
 
-                b_value = value;
-                r_distanceUI.Value = (uint)value;
+                b_Value = value;
+                m_DistanceUI.Value = (uint)value;
 
-                float reflexThreshold = r_distanceSetting.reflexTime * w_decreasePerSecond;
+                float reflexThreshold = m_DistanceSetting.ReflexTime * m_DecreasePerSecond;
                 if (value < reflexThreshold)
                 {
                     float v = Mathf.InverseLerp(reflexThreshold, 0f, value);
-                    w_timeScale = Mathf.Lerp(1f, r_distanceSetting.reflexTimeScale, v);
-                    w_chromaticAberration.intensity.value = v;
-                    w_lensDistortion.intensity.value = Mathf.Lerp(r_lensDistortionInitialIntinsity, -r_lensDistortionInitialIntinsity, v);
+                    m_TimeScale = Mathf.Lerp(1f, m_DistanceSetting.ReflexTimeScale, v);
+                    m_ChromaticAberration.intensity.value = v;
+                    m_LensDistortion.intensity.value = Mathf.Lerp(m_LensDistortionInitialIntensity, -m_LensDistortionInitialIntensity, v);
                 }
                 else
                 {
@@ -55,41 +42,60 @@ namespace Score
             }
         }
 
-        public void ResetPostProcess()
-        {
-            w_chromaticAberration.intensity.value = 0.0f;
-            w_lensDistortion.intensity.value = r_lensDistortionInitialIntinsity;
-        }
+        [SerializeField]
+        private DistanceUI m_DistanceUI;
 
+        [SerializeField]
+        private DistanceSetting m_DistanceSetting;
 
+        [SerializeField]
+        private GameManager m_GameManager;
+
+        [SerializeField]
+        private Volume m_Volume;
+
+        private ChromaticAberration m_ChromaticAberration;
+        private LensDistortion m_LensDistortion;
+        private float m_DecreasePerSecond;
+        private float m_LensDistortionInitialIntensity;
+        private float m_TimeScale = 1f;
+        private bool m_IsStopping = false;
+
+        private float b_Value;
 
         private void Awake()
         {
-            if (!r_volume.profile.TryGet<ChromaticAberration>(out w_chromaticAberration))
+            if (!m_Volume.profile.TryGet<ChromaticAberration>(out m_ChromaticAberration))
             {
                 Debug.LogWarning("ChromaticAberrationがない");
             }
-            if (!r_volume.profile.TryGet<LensDistortion>(out w_lensDistortion))
+            if (!m_Volume.profile.TryGet<LensDistortion>(out m_LensDistortion))
             {
                 Debug.LogWarning("LensDistortionがない");
             }
 
-            r_lensDistortionInitialIntinsity = w_lensDistortion.intensity.value;
+            m_LensDistortionInitialIntensity = m_LensDistortion.intensity.value;
         }
 
         private void Start()
         {
-            r_distanceUI.Threshold = (uint)(r_distanceSetting.decreasePerSecond * r_distanceSetting.timeToReach);
-            Value = r_distanceSetting.initialValue;
-            w_decreasePerSecond = r_distanceSetting.decreasePerSecond;
+            m_DistanceUI.Threshold = (uint)(m_DistanceSetting.DecreasePerSecond * m_DistanceSetting.TimeToReach);
+            Value = m_DistanceSetting.InitialValue;
+            m_DecreasePerSecond = m_DistanceSetting.DecreasePerSecond;
         }
 
         private void Update()
         {
-            if (!r_gameManager.IsGaugeIncreasing) { return; }
-            w_decreasePerSecond += r_distanceSetting.acceleration * Time.deltaTime * w_timeScale;
-            r_distanceUI.Threshold = (uint)(w_decreasePerSecond * r_distanceSetting.timeToReach);
-            Value -= w_decreasePerSecond * Time.deltaTime * w_timeScale;
+            if (!m_GameManager.IsGaugeIncreasing) { return; }
+            m_DecreasePerSecond += m_DistanceSetting.Acceleration * Time.deltaTime * m_TimeScale;
+            m_DistanceUI.Threshold = (uint)(m_DecreasePerSecond * m_DistanceSetting.TimeToReach);
+            Value -= m_DecreasePerSecond * Time.deltaTime * m_TimeScale;
+        }
+
+        public void ResetPostProcess()
+        {
+            m_ChromaticAberration.intensity.value = 0.0f;
+            m_LensDistortion.intensity.value = m_LensDistortionInitialIntensity;
         }
     }
 }

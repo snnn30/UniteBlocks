@@ -5,38 +5,45 @@
 using TMPro;
 using UnityEngine;
 
-namespace Score
+namespace UniteBlocks
 {
     public class ResultUI : MonoBehaviour
     {
-        [SerializeField] TextMeshProUGUI r_highScoreValue;
-        [SerializeField] TextMeshProUGUI r_currentScoreValue;
-        [SerializeField] TextMeshProUGUI r_pressAnyKey;
-        uint b_highScore;
-        uint b_currentScore;
-
         public uint HighScore
         {
-            get { return b_highScore; }
+            get { return b_HighScore; }
             set
             {
-                b_highScore = value;
-                r_highScoreValue.text = value.ToString();
+                b_HighScore = value;
+                m_HighScoreValue.text = value.ToString();
             }
         }
+
         public uint CurrentScore
         {
-            get { return b_currentScore; }
+            get { return b_CurrentScore; }
             set
             {
-                b_currentScore = value;
-                r_currentScoreValue.text = value.ToString();
+                b_CurrentScore = value;
+                m_CurrentScoreValue.text = value.ToString();
             }
         }
+
+        [SerializeField]
+        private TextMeshProUGUI m_HighScoreValue;
+
+        [SerializeField]
+        private TextMeshProUGUI m_CurrentScoreValue;
+
+        [SerializeField]
+        private TextMeshProUGUI m_PressAnyKey;
+
+        private uint b_HighScore;
+        private uint b_CurrentScore;
 
         public void SetVisilityPressAnyKey(bool visible)
         {
-            r_pressAnyKey.gameObject.SetActive(visible);
+            m_PressAnyKey.gameObject.SetActive(visible);
         }
     }
 }

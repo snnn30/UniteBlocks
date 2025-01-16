@@ -4,55 +4,64 @@
 
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using Manager;
 using UniRx;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 
-namespace Score
+namespace UniteBlocks
 {
     public class ScoreManager : MonoBehaviour
     {
-        [SerializeField] ScoreData _score;
-        [SerializeField] ScoreData _scoreAddition;
-        [SerializeField] ScoreData _scoreMultiplication;
-        [SerializeField] DistanceManager _distanceManager;
-        [SerializeField] GameManager _gameManager;
-        [SerializeField] ResultUI _resultUI;
-        [SerializeField] PlayerInput _input;
-        [SerializeField] Volume _volume;
-        [SerializeField, Range(1f, 2f)] float _scaleAtAddition = 1.2f;
-        [SerializeField, Range(0f, 5f)] float _timeToResolve = 2f;
-        [SerializeField, Range(0f, 5f)] float _timeToAdd = 0.4f;
-
         public bool IsOperating { get; private set; } = false;
-        ScoreData Score => _score;
-        ScoreData ScoreAddition => _scoreAddition;
-        ScoreData ScoreMultiplication => _scoreMultiplication;
-        ResultUI ResultUI => _resultUI;
-        float ScaleAtAddition => _scaleAtAddition;
-        float TimeToResolve => _timeToResolve;
-        float TimeToAdd => _timeToAdd;
 
+        [SerializeField]
+        private ScoreData m_Score;
 
+        [SerializeField]
+        private ScoreData m_ScoreAddition;
+
+        [SerializeField]
+        private ScoreData m_ScoreMultiplication;
+
+        [SerializeField]
+        private DistanceManager m_DistanceManager;
+
+        [SerializeField]
+        private GameManager m_GameManager;
+
+        [SerializeField]
+        private ResultUI m_ResultUI;
+
+        [SerializeField]
+        private PlayerInput m_Input;
+
+        [SerializeField]
+        private Volume m_Volume;
+
+        [SerializeField, Range(1f, 2f)]
+        private float m_ScaleAtAddition = 1.2f;
+
+        [SerializeField, Range(0f, 5f)]
+        private float m_TimeToResolve = 1.4f;
+
+        [SerializeField, Range(0f, 5f)]
+        private float m_TimeToAdd = 0.4f;
 
         public void Start()
         {
-            Score.SetVisible(true);
-            _gameManager.OnGameOver.Subscribe(_ =>
+            m_Score.SetVisible(true);
+            m_GameManager.OnGameOver.Subscribe(_ =>
             {
                 SaveScore().Forget();
             }).AddTo(this);
         }
 
-
-
         public async UniTask AddScoreAddition(uint value)
         {
             if (IsOperating) { Debug.LogWarning("操作中"); return; }
             IsOperating = true;
-            await ScoreAddition.SetValue(ScoreAddition.Value + value, TimeToAdd, ScaleAtAddition);
+            await m_ScoreAddition.SetValue(m_ScoreAddition.Value + value, m_TimeToAdd, m_ScaleAtAddition);
             IsOperating = false;
         }
 
@@ -60,14 +69,14 @@ namespace Score
         {
             if (IsOperating) { Debug.LogWarning("操作中"); return; }
             IsOperating = true;
-            await ScoreMultiplication.SetValue(ScoreMultiplication.Value + value, TimeToAdd, ScaleAtAddition);
+            await m_ScoreMultiplication.SetValue(m_ScoreMultiplication.Value + value, m_TimeToAdd, m_ScaleAtAddition);
             IsOperating = false;
         }
 
         public void SetVisible(bool visible)
         {
-            ScoreAddition.SetVisible(visible);
-            ScoreMultiplication.SetVisible(visible);
+            m_ScoreAddition.SetVisible(visible);
+            m_ScoreMultiplication.SetVisible(visible);
         }
 
         public async UniTask ResolveAddition()
@@ -75,19 +84,19 @@ namespace Score
             if (IsOperating) { Debug.LogWarning("操作中"); return; }
             IsOperating = true;
 
-            uint targetScore = Score.Value + ScoreAddition.Value;
+            uint targetScore = m_Score.Value + m_ScoreAddition.Value;
             if (targetScore > 999999999) { targetScore = 999999999; }
 
-            var scoreTween = Score.SetValue(targetScore, TimeToResolve);
-            var scoreAddedTween = ScoreAddition.SetValue(0, TimeToResolve);
+            var scoreTween = m_Score.SetValue(targetScore, m_TimeToResolve);
+            var scoreAddedTween = m_ScoreAddition.SetValue(0, m_TimeToResolve);
             var distanceTween = DOTween.To(
-                () => _distanceManager.Value,
+                () => m_DistanceManager.Value,
                 x =>
                 {
-                    _distanceManager.Value = x;
+                    m_DistanceManager.Value = x;
                 },
-                _distanceManager.Value + ScoreAddition.Value,
-                TimeToResolve
+                m_DistanceManager.Value + m_ScoreAddition.Value,
+                m_TimeToResolve
                 );
 
             await scoreAddedTween;
@@ -95,7 +104,8 @@ namespace Score
             await distanceTween;
 
             // この方法でゲームオーバーにするとDotweenで警告が出るが問題なく動作する
-            if (targetScore == 999999999) { _gameManager.GameOver(); }
+            // かなりレアなバグらしく原因不明とのこと
+            if (targetScore == 999999999) { m_GameManager.GameOver(); }
 
             IsOperating = false;
         }
@@ -103,11 +113,11 @@ namespace Score
         public async UniTask ResolveMultiplication()
         {
             if (IsOperating) { Debug.LogWarning("操作中"); return; }
-            if (ScoreMultiplication.Value == 1) { return; }
+            if (m_ScoreMultiplication.Value == 1) { return; }
             IsOperating = true;
 
-            var scoreAddedTween = ScoreAddition.SetValue(ScoreAddition.Value * ScoreMultiplication.Value, TimeToResolve, 1f);
-            var scoreMultiplicationTween = ScoreMultiplication.SetValue(1, TimeToResolve, 1f);
+            var scoreAddedTween = m_ScoreAddition.SetValue(m_ScoreAddition.Value * m_ScoreMultiplication.Value, m_TimeToResolve, 1f);
+            var scoreMultiplicationTween = m_ScoreMultiplication.SetValue(1, m_TimeToResolve, 1f);
 
             await scoreAddedTween;
             await scoreMultiplicationTween;
@@ -117,34 +127,34 @@ namespace Score
 
         public async UniTask SaveScore()
         {
-            _distanceManager.ResetPostProcess();
+            m_DistanceManager.ResetPostProcess();
 
-            if (Score.Value > (uint)PlayerPrefs.GetInt("HighScore1") + (uint)PlayerPrefs.GetInt("HighScore2"))
+            if (m_Score.Value > (uint)PlayerPrefs.GetInt("HighScore1") + (uint)PlayerPrefs.GetInt("HighScore2"))
             {
-                if (Score.Value > int.MaxValue)
+                if (m_Score.Value > int.MaxValue)
                 {
                     PlayerPrefs.SetInt("HighScore1", int.MaxValue);
-                    PlayerPrefs.SetInt("HighScore2", (int)(Score.Value - int.MaxValue));
+                    PlayerPrefs.SetInt("HighScore2", (int)(m_Score.Value - int.MaxValue));
                 }
                 else
                 {
-                    PlayerPrefs.SetInt("HighScore1", (int)Score.Value);
+                    PlayerPrefs.SetInt("HighScore1", (int)m_Score.Value);
                 }
             }
 
-            ResultUI.HighScore = (uint)PlayerPrefs.GetInt("HighScore1") + (uint)PlayerPrefs.GetInt("HighScore2");
-            ResultUI.CurrentScore = Score.Value;
-            ResultUI.gameObject.SetActive(true);
-            ResultUI.SetVisilityPressAnyKey(false);
+            m_ResultUI.HighScore = (uint)PlayerPrefs.GetInt("HighScore1") + (uint)PlayerPrefs.GetInt("HighScore2");
+            m_ResultUI.CurrentScore = m_Score.Value;
+            m_ResultUI.gameObject.SetActive(true);
+            m_ResultUI.SetVisilityPressAnyKey(false);
 
             await UniTask.WaitForSeconds(2f, ignoreTimeScale: true);
-            ResultUI.SetVisilityPressAnyKey(true);
-            _input.actions["AnyKey"].performed += OnAnyKeyPerformed;
+            m_ResultUI.SetVisilityPressAnyKey(true);
+            m_Input.actions["AnyKey"].performed += OnAnyKeyPerformed;
 
             void OnAnyKeyPerformed(InputAction.CallbackContext context)
             {
-                _input.actions["AnyKey"].performed -= OnAnyKeyPerformed;
-                _gameManager.Restart();
+                m_Input.actions["AnyKey"].performed -= OnAnyKeyPerformed;
+                m_GameManager.Restart();
             }
         }
 
