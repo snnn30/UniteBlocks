@@ -55,13 +55,18 @@ namespace UniteBlocks
             m_Input.actions["AnyKey"].performed += GameStart;
         }
 
+        // InputActionに登録する関係上戻り値にUniTaskを使えない
         async void GameStart(InputAction.CallbackContext context)
         {
             m_Input.actions["AnyKey"].performed -= GameStart;
             m_StartUI.gameObject.SetActive(false);
 
             m_CountDownUI.gameObject.SetActive(true);
+
+            var token = gameObject.GetCancellationTokenOnDestroy();
             await m_CountDownUI.CountDown();
+            if (token.IsCancellationRequested) { return; }
+
             m_CountDownUI.gameObject.SetActive(false);
 
             Time.timeScale = 1;

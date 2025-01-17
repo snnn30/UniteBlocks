@@ -76,6 +76,7 @@ namespace UniteBlocks
 
         void OnSwapPerformed(InputAction.CallbackContext context)
         {
+            if (Time.timeScale == 0f) { return; }
             if (IsActive)
             {
                 IsActive = false;

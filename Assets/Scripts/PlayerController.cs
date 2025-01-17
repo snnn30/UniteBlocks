@@ -50,7 +50,21 @@ namespace UniteBlocks
         private Vector2Int m_Position;
         private Direction m_Rotation;
 
-        private bool m_IsAcceptingInput = true;
+        private bool b_IsAcceptingInput;
+
+        private bool IsAcceptingInput
+        {
+            get
+            {
+                if (Time.timeScale == 0) { return false; }
+                return b_IsAcceptingInput;
+            }
+            set
+            {
+                b_IsAcceptingInput = value;
+            }
+        }
+
         private List<MotionHandle> m_Handles = new List<MotionHandle>();
 
         private float m_DropDelay;
@@ -59,6 +73,7 @@ namespace UniteBlocks
         {
             m_Input = GetComponent<PlayerInput>();
             m_DropDelay = m_PlayerSetting.AutoDropDelay;
+            IsAcceptingInput = true;
         }
 
         private void Start()
@@ -102,7 +117,7 @@ namespace UniteBlocks
 
         public async UniTask GroundingProcess()
         {
-            m_IsAcceptingInput = false;
+            IsAcceptingInput = false;
             foreach (var handle in m_Handles)
             {
                 await handle;
@@ -114,7 +129,7 @@ namespace UniteBlocks
                 await m_BoardController.Explode(m_Position);
                 m_Items[0] = null;
                 ChangeOperationPuyos();
-                m_IsAcceptingInput = true;
+                IsAcceptingInput = true;
                 return;
             }
 
@@ -127,7 +142,7 @@ namespace UniteBlocks
             if (gameOver) { return; }
 
             ChangeOperationPuyos();
-            m_IsAcceptingInput = true;
+            IsAcceptingInput = true;
 
             return;
         }
@@ -185,7 +200,7 @@ namespace UniteBlocks
             var direction = (value < 0) ? Vector2Int.left : Vector2Int.right;
             var targetPos = m_Position + direction;
 
-            if (!m_IsAcceptingInput) { return; }
+            if (!IsAcceptingInput) { return; }
             if (!CanSet(targetPos, m_Rotation)) { return; }
 
             Vector3 vec3 = new Vector3(direction.x, direction.y, 0);
@@ -251,7 +266,7 @@ namespace UniteBlocks
                 targetAmount = 90;
             }
 
-            if (!m_IsAcceptingInput) { return false; }
+            if (!IsAcceptingInput) { return false; }
             if (!CanSet(m_Position, targetRot)) { return false; }
 
             float currentAngle = 0;
@@ -300,7 +315,7 @@ namespace UniteBlocks
         {
             Vector2Int targetPos = m_Position + Vector2Int.down;
 
-            if (!m_IsAcceptingInput) { return; }
+            if (!IsAcceptingInput) { return; }
 
             if (!CanSet(targetPos, m_Rotation))
             {
@@ -332,7 +347,7 @@ namespace UniteBlocks
             DisposeCTS(ref m_DropCTS);
             m_DropCTS = new CancellationTokenSource();
 
-            if (m_IsAcceptingInput) { GameManager.Instance.IsGaugeIncreasing = true; }
+            if (IsAcceptingInput) { GameManager.Instance.IsGaugeIncreasing = true; }
             m_WaitingBomb.IsBoosting = true;
             m_DropDelay = m_PlayerSetting.ManualDropDelay;
 
@@ -353,7 +368,7 @@ namespace UniteBlocks
 
             await UniTask.WaitForSeconds(m_PlayerSetting.StagnationTime, cancellationToken: m_DropCTS.Token);
 
-            if (m_IsAcceptingInput) { GameManager.Instance.IsGaugeIncreasing = true; }
+            if (IsAcceptingInput) { GameManager.Instance.IsGaugeIncreasing = true; }
             DropContinuous(m_DropCTS.Token).Forget();
         }
 

@@ -38,20 +38,6 @@ namespace UniteBlocks
         [SerializeField]
         private float m_DissolveTime = 0.28f;
 
-        void ClearAll()
-        {
-            for (int y = 0; y < BOARD_HEIGHT; y++)
-            {
-                for (int x = 0; x < BOARD_WIDTH; x++)
-                {
-                    m_Coord[x, y] = null;
-                    if (m_Origins == null) { continue; }
-                    Destroy(m_Origins[x, y]);
-                    m_Origins[x, y] = null;
-                }
-            }
-        }
-
         /// <summary>
         /// そのマスが有効かどうかを検証
         /// </summary>
@@ -65,11 +51,12 @@ namespace UniteBlocks
         /// <summary>
         /// アイテムがおけるかを検証
         /// </summary>
-        public bool CanSettle(Vector2Int pos, Block block)
+        public bool CanSettle(Vector2Int pos, Vector2Int? shape = null)
         {
-            for (int x = pos.x; x < pos.x + block.Shape.x; x++)
+            shape ??= Vector2Int.one;
+            for (int x = pos.x; x < pos.x + shape.Value.x; x++)
             {
-                for (int y = pos.y; y < pos.y + block.Shape.y; y++)
+                for (int y = pos.y; y < pos.y + shape.Value.y; y++)
                 {
                     var target = new Vector2Int(x, y);
                     if (!IsValid(target)) { return false; }
@@ -78,19 +65,13 @@ namespace UniteBlocks
             }
             return true;
         }
-        public bool CanSettle(Vector2Int pos)
-        {
-            if (!IsValid(pos)) { return false; }
-            if (m_Coord[pos.x, pos.y] != null) { return false; }
-            return true;
-        }
 
         /// <summary>
         /// アイテムを置く
         /// </summary>
         public void Settle(Vector2Int pos, Block block)
         {
-            if (!CanSettle(pos, block))
+            if (!CanSettle(pos, block.Shape))
             {
                 Debug.LogError("セット先が無効");
                 return;
@@ -155,7 +136,7 @@ namespace UniteBlocks
                     // 下の行を検査
                     for (int j = y - 1; j >= 0; j--)
                     {
-                        if (!CanSettle(new Vector2Int(x, j), block)) { break; }
+                        if (!CanSettle(new Vector2Int(x, j), block.Shape)) { break; }
                         targetHeight--;
                     }
 
@@ -171,14 +152,11 @@ namespace UniteBlocks
                 }
             }
 
-
             foreach (var handle in handles)
             {
                 await handle;
             }
-
             await Combine();
-
             return CheckGameOver();
         }
 
@@ -189,6 +167,9 @@ namespace UniteBlocks
             return true;
         }
 
+        /// <summary>
+        /// 塊を作成
+        /// </summary>
         async UniTask Combine()
         {
             List<MotionHandle> handles = new List<MotionHandle>();
@@ -245,43 +226,6 @@ namespace UniteBlocks
                         })
                         .AddTo(this);
                     handles.Add(handle);
-
-
-                    // その範囲内がぷよで埋まっており、
-                    // その範囲内のぷよが全部x0,y0のぷよと同じタイプであり、
-                    // その範囲からはみ出ていなければtrue
-                    // 高さか幅が1ならパス　通すとdeletePuyosが変化してしまう
-                    bool CheckInRange(int x0, int y0, int x1, int y1, ref List<Vector2Int> deleteBlocks)
-                    {
-                        if (x0 == x1 || y0 == y1) { return false; }
-                        Color type = m_Origins[x0, y0].Color;
-                        List<Vector2Int> origins = new List<Vector2Int>();
-
-                        for (int i = x0; i <= x1; i++)
-                        {
-                            for (int j = y0; j <= y1; j++)
-                            {
-                                if (m_Coord[i, j] == null) { return false; }
-                                Vector2Int pos = (Vector2Int)m_Coord[i, j];
-                                if (origins.Contains(pos)) { continue; }
-                                origins.Add(pos);
-                            }
-                        }
-
-                        foreach (Vector2Int pos in origins)
-                        {
-                            Block target = m_Origins[pos.x, pos.y];
-                            if (target.Color != type) { return false; }
-                            if (pos.x < x0 || pos.y < y0) { return false; }
-                            if (pos.x + target.Shape.x - 1 > x1 || pos.y + target.Shape.y - 1 > y1) { return false; }
-                        }
-
-                        origins.Remove(new Vector2Int(x0, y0));
-                        deleteBlocks = origins;
-                        return true;
-                    }
-
-
                 }
             }
 
@@ -291,6 +235,48 @@ namespace UniteBlocks
             }
         }
 
+        /// <summary>
+        /// 塊を作れるかどうかをチェック
+        /// </summary>
+        /// <param name="x0">左下座標</param>
+        /// <param name="y0">左下座標</param>
+        /// <param name="x1">右上座標</param>
+        /// <param name="y1">右上座標</param>
+        /// <param name="deleteBlocks">塊を作る際の削除対象</param>
+        /// <returns>塊を作れるかどうか</returns>
+        bool CheckInRange(int x0, int y0, int x1, int y1, ref List<Vector2Int> deleteBlocks)
+        {
+            // 幅か高さが1の場合はパス
+            if (x0 == x1 || y0 == y1) { return false; }
+            Color type = m_Origins[x0, y0].Color;
+            List<Vector2Int> origins = new List<Vector2Int>();
+
+            // 範囲内のブロックをリストに格納
+            for (int i = x0; i <= x1; i++)
+            {
+                for (int j = y0; j <= y1; j++)
+                {
+                    if (m_Coord[i, j] == null) { return false; }
+                    Vector2Int pos = (Vector2Int)m_Coord[i, j];
+                    if (origins.Contains(pos)) { continue; }
+                    origins.Add(pos);
+                }
+            }
+
+            // 同じ色か、範囲内に収まっているかをチェック
+            foreach (Vector2Int pos in origins)
+            {
+                Block target = m_Origins[pos.x, pos.y];
+                if (target.Color != type) { return false; }
+                if (pos.x < x0 || pos.y < y0) { return false; }
+                if (pos.x + target.Shape.x - 1 > x1 || pos.y + target.Shape.y - 1 > y1) { return false; }
+            }
+
+            // 削除対象から原点を削除
+            origins.Remove(new Vector2Int(x0, y0));
+            deleteBlocks = origins;
+            return true;
+        }
 
         // posはBombが置かれた位置
         public async UniTask Explode(Vector2Int pos)
@@ -302,6 +288,7 @@ namespace UniteBlocks
             Vector2Int origin = (Vector2Int)m_Coord[pos.x, pos.y];
             Color type = m_Origins[origin.x, origin.y].Color;
 
+            // 時系列順に消す対象のまとまりが格納される
             List<List<Vector2Int>> origins = new List<List<Vector2Int>>();
             origins.Add(new List<Vector2Int> { origin });
 
@@ -314,6 +301,8 @@ namespace UniteBlocks
                 {
                     GetNextExplosionTargets(latest);
                 }
+
+                // そのブロックと隣接していてまだ削除予定が無いブロックをリストアップしaddListに追加
                 void GetNextExplosionTargets(Vector2Int origin)
                 {
                     List<Vector2Int> inspectionPositions = GetTouchingBlocks(origin);
@@ -376,8 +365,6 @@ namespace UniteBlocks
                 await m_ScoreManager.AddScoreMultiplication(multiplier);
             }
 
-            await UniTask.WaitForSeconds(0.08f);
-
             foreach (var handle in handles)
             {
                 await handle;
@@ -390,7 +377,9 @@ namespace UniteBlocks
             m_ScoreManager.SetVisible(false);
         }
 
-        // 斜めは含まない
+        /// <summary>
+        /// 斜めを含まない隣接しているブロックをリストアップ
+        /// </summary>
         List<Vector2Int> GetTouchingBlocks(Vector2Int origin)
         {
             List<Vector2Int> outList = new List<Vector2Int>();
