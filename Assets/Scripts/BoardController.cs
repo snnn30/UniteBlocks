@@ -24,9 +24,6 @@ namespace UniteBlocks
         private GameObject m_BlocksContainer;
 
         [SerializeField]
-        private GameManager m_GameManager;
-
-        [SerializeField]
         private ScoreManager m_ScoreManager;
 
         [SerializeField]
@@ -188,7 +185,7 @@ namespace UniteBlocks
         bool CheckGameOver()
         {
             if (m_Coord[START_POS.x, START_POS.y] == null) { return false; }
-            m_GameManager.GameOver();
+            GameManager.Instance.GameOver();
             return true;
         }
 

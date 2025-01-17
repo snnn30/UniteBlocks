@@ -20,7 +20,7 @@ namespace UniteBlocks
                 if (value <= 0.0f)
                 {
                     m_IsStopping = true;
-                    m_GameManager.GameOver();
+                    GameManager.Instance.GameOver();
                     return;
                 }
 
@@ -47,9 +47,6 @@ namespace UniteBlocks
 
         [SerializeField]
         private DistanceSetting m_DistanceSetting;
-
-        [SerializeField]
-        private GameManager m_GameManager;
 
         [SerializeField]
         private Volume m_Volume;
@@ -86,7 +83,7 @@ namespace UniteBlocks
 
         private void Update()
         {
-            if (!m_GameManager.IsGaugeIncreasing) { return; }
+            if (!GameManager.Instance.IsGaugeIncreasing) { return; }
             m_DecreasePerSecond += m_DistanceSetting.Acceleration * Time.deltaTime * m_TimeScale;
             m_DistanceUI.Threshold = (int)(m_DecreasePerSecond * m_DistanceSetting.TimeToReach);
             Value -= m_DecreasePerSecond * Time.deltaTime * m_TimeScale;

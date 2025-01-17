@@ -28,9 +28,6 @@ namespace UniteBlocks
         private DistanceManager m_DistanceManager;
 
         [SerializeField]
-        private GameManager m_GameManager;
-
-        [SerializeField]
         private ResultUI m_ResultUI;
 
         [SerializeField]
@@ -51,7 +48,7 @@ namespace UniteBlocks
         public void Start()
         {
             m_Score.SetVisible(true);
-            m_GameManager.OnGameOver.Subscribe(_ =>
+            GameManager.Instance.OnGameOver.Subscribe(_ =>
             {
                 SaveScore().Forget();
             }).AddTo(this);
@@ -102,7 +99,7 @@ namespace UniteBlocks
             // テストしたところなぜかm_Score.Valueが999999999を超えていた　問題大ありやないか
             if (targetScore == 999999999)
             {
-                m_GameManager.GameOver();
+                GameManager.Instance.GameOver();
             }
 
             IsOperating = false;
@@ -144,7 +141,7 @@ namespace UniteBlocks
             void OnAnyKeyPerformed(InputAction.CallbackContext context)
             {
                 m_Input.actions["AnyKey"].performed -= OnAnyKeyPerformed;
-                m_GameManager.Restart();
+                GameManager.Instance.Restart();
             }
         }
 

@@ -39,9 +39,6 @@ namespace UniteBlocks
         [SerializeField]
         private WaitingBomb m_WaitingBomb;
 
-        [SerializeField]
-        private GameManager m_GameManager;
-
         private PlayerInput m_Input;
         private CancellationTokenSource m_MoveCTS;
         private CancellationTokenSource m_RotateCTS;
@@ -307,7 +304,7 @@ namespace UniteBlocks
 
             if (!CanSet(targetPos, m_Rotation))
             {
-                m_GameManager.IsGaugeIncreasing = false;
+                GameManager.Instance.IsGaugeIncreasing = false;
                 await GroundingProcess();
                 await StartDrop();
                 return;
@@ -335,7 +332,7 @@ namespace UniteBlocks
             DisposeCTS(ref m_DropCTS);
             m_DropCTS = new CancellationTokenSource();
 
-            if (m_IsAcceptingInput) { m_GameManager.IsGaugeIncreasing = true; }
+            if (m_IsAcceptingInput) { GameManager.Instance.IsGaugeIncreasing = true; }
             m_WaitingBomb.IsBoosting = true;
             m_DropDelay = m_PlayerSetting.ManualDropDelay;
 
@@ -352,11 +349,11 @@ namespace UniteBlocks
         {
             DisposeCTS(ref m_DropCTS);
             m_DropCTS = new CancellationTokenSource();
-            m_GameManager.IsGaugeIncreasing = false;
+            GameManager.Instance.IsGaugeIncreasing = false;
 
             await UniTask.WaitForSeconds(m_PlayerSetting.StagnationTime, cancellationToken: m_DropCTS.Token);
 
-            if (m_IsAcceptingInput) { m_GameManager.IsGaugeIncreasing = true; }
+            if (m_IsAcceptingInput) { GameManager.Instance.IsGaugeIncreasing = true; }
             DropContinuous(m_DropCTS.Token).Forget();
         }
 

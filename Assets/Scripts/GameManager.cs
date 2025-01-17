@@ -15,6 +15,10 @@ namespace UniteBlocks
 {
     public class GameManager : MonoBehaviour
     {
+        private static GameManager s_Instance;
+
+        public static GameManager Instance => s_Instance;
+
         public bool IsGaugeIncreasing { get; set; } = false;
         public IObservable<Unit> OnGameOver => m_Subject;
 
@@ -39,6 +43,7 @@ namespace UniteBlocks
         {
             m_StartUI.gameObject.SetActive(true);
             Time.timeScale = 0;
+            s_Instance = this;
         }
 
         private async void OnEnable()

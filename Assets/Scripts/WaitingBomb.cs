@@ -41,9 +41,6 @@ namespace UniteBlocks
         [SerializeField]
         private PlayerSetting m_PlayerSetting;
 
-        [SerializeField]
-        private GameManager m_GameManager;
-
         private Material m_Material;
 
         private bool b_IsActive;
@@ -67,7 +64,7 @@ namespace UniteBlocks
 
         private void Update()
         {
-            if (!m_GameManager.IsGaugeIncreasing) { return; }
+            if (!GameManager.Instance.IsGaugeIncreasing) { return; }
             float boost = 1f;
             if (IsBoosting)
             {
