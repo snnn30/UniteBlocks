@@ -13,8 +13,6 @@ namespace UniteBlocks
 {
     public class ScoreManager : MonoBehaviour
     {
-        public bool IsOperating { get; private set; } = false;
-
         [SerializeField]
         private ScoreData m_Score;
 
@@ -45,7 +43,11 @@ namespace UniteBlocks
         [SerializeField, Range(0f, 5f)]
         private float m_TimeToAdd = 0.4f;
 
-        public void Start()
+        private bool m_IsOperating = false;
+
+        const int MAX_SCORE = 999999999;
+
+        private void Start()
         {
             m_Score.SetVisible(true);
             GameManager.Instance.OnGameOver.Subscribe(_ =>
@@ -56,18 +58,18 @@ namespace UniteBlocks
 
         public async UniTask AddScoreAddition(int value)
         {
-            if (IsOperating) { Debug.LogWarning("操作中"); return; }
-            IsOperating = true;
+            if (m_IsOperating) { Debug.LogWarning("操作中"); return; }
+            m_IsOperating = true;
             await m_ScoreAddition.SetValue(m_ScoreAddition.Value + value, m_TimeToAdd, m_ScaleAtAddition);
-            IsOperating = false;
+            m_IsOperating = false;
         }
 
         public async UniTask AddScoreMultiplication(int value)
         {
-            if (IsOperating) { Debug.LogWarning("操作中"); return; }
-            IsOperating = true;
+            if (m_IsOperating) { Debug.LogWarning("操作中"); return; }
+            m_IsOperating = true;
             await m_ScoreMultiplication.SetValue(m_ScoreMultiplication.Value + value, m_TimeToAdd, m_ScaleAtAddition);
-            IsOperating = false;
+            m_IsOperating = false;
         }
 
         public void SetVisible(bool visible)
@@ -78,11 +80,11 @@ namespace UniteBlocks
 
         public async UniTask ResolveAddition()
         {
-            if (IsOperating) { Debug.LogWarning("操作中"); return; }
-            IsOperating = true;
+            if (m_IsOperating) { Debug.LogWarning("操作中"); return; }
+            m_IsOperating = true;
 
             int targetScore = m_Score.Value + m_ScoreAddition.Value;
-            if (targetScore > 999999999) { targetScore = 999999999; }
+            if (targetScore > MAX_SCORE) { targetScore = MAX_SCORE; }
 
             var scoreTween = m_Score.SetValue(targetScore, m_TimeToResolve);
             var scoreAddedTween = m_ScoreAddition.SetValue(0, m_TimeToResolve);
@@ -97,19 +99,20 @@ namespace UniteBlocks
             // この方法でゲームオーバーにするとDotweenで警告が出るが問題なく動作する
             // かなりレアなバグらしく原因不明とのこと
             // テストしたところなぜかm_Score.Valueが999999999を超えていた　問題大ありやないか
-            if (targetScore == 999999999)
+            // 解決済み Tweenの補完に問題があったっぽい
+            if (targetScore == MAX_SCORE)
             {
                 GameManager.Instance.GameOver();
             }
 
-            IsOperating = false;
+            m_IsOperating = false;
         }
 
         public async UniTask ResolveMultiplication()
         {
-            if (IsOperating) { Debug.LogWarning("操作中"); return; }
+            if (m_IsOperating) { Debug.LogWarning("操作中"); return; }
             if (m_ScoreMultiplication.Value == 1) { return; }
-            IsOperating = true;
+            m_IsOperating = true;
 
             var scoreAddedTween = m_ScoreAddition.SetValue(m_ScoreAddition.Value * m_ScoreMultiplication.Value, m_TimeToResolve, 1f);
             var scoreMultiplicationTween = m_ScoreMultiplication.SetValue(1, m_TimeToResolve, 1f);
@@ -117,10 +120,10 @@ namespace UniteBlocks
             await scoreAddedTween;
             await scoreMultiplicationTween;
 
-            IsOperating = false;
+            m_IsOperating = false;
         }
 
-        public async UniTask SaveScore()
+        async UniTask SaveScore()
         {
             m_DistanceManager.ResetPostProcess();
 
@@ -147,12 +150,12 @@ namespace UniteBlocks
 
 
         // テスト用
-
+        /*
         void Update()
         {
             if (Input.GetKeyDown(KeyCode.N)) { m_Score.Value = 999999000; }
         }
-
+        */
 
     }
 }

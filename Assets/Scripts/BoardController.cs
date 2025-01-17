@@ -371,6 +371,8 @@ namespace UniteBlocks
             }
             await DropToBottom();
 
+            await UniTask.WaitForSeconds(0.3f);
+
             await m_ScoreManager.ResolveMultiplication();
             await UniTask.WaitForSeconds(0.2f);
             await m_ScoreManager.ResolveAddition();

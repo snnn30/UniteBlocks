@@ -485,7 +485,6 @@ MonoBehaviour:
   m_ScoreAddition: {fileID: 1736419895}
   m_ScoreMultiplication: {fileID: 1110359505}
   m_DistanceManager: {fileID: 2085417868}
-  m_GameManager: {fileID: 1340963657}
   m_ResultUI: {fileID: 325169923}
   m_Input: {fileID: 892744479}
   m_Volume: {fileID: 1210362307}
@@ -835,8 +834,8 @@ MonoBehaviour:
   m_Gradient:
     serializedVersion: 2
     key0: {r: 0.051886797, g: 1, b: 0.05399537, a: 1}
-    key1: {r: 0.91677713, g: 1, b: 0.08962262, a: 1}
-    key2: {r: 1, g: 0, b: 0, a: 0}
+    key1: {r: 1.833554, g: 1.9999998, b: 0.1792452, a: 1}
+    key2: {r: 3.9999998, g: 0, b: 0, a: 0}
     key3: {r: 0, g: 0, b: 0, a: 0}
     key4: {r: 0, g: 0, b: 0, a: 0}
     key5: {r: 0, g: 0, b: 0, a: 0}
@@ -2997,7 +2996,6 @@ MonoBehaviour:
   m_WaitingItems: {fileID: 564983539}
   m_PlayerSetting: {fileID: 11400000, guid: f5a9e9c9a10f47c4c9712550eed7e4b0, type: 2}
   m_WaitingBomb: {fileID: 1327800450}
-  m_GameManager: {fileID: 1340963657}
 --- !u!1 &903200698
 GameObject:
   m_ObjectHideFlags: 0
@@ -3948,7 +3946,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BlocksContainer: {fileID: 21047126}
-  m_GameManager: {fileID: 1340963657}
   m_ScoreManager: {fileID: 159018429}
   m_PointSetting: {fileID: 11400000, guid: 227d4312b86b09641a6d347d2d58ed3a, type: 2}
   m_DropTime: 0.5
@@ -4055,7 +4052,6 @@ MonoBehaviour:
   m_Gauge: {fileID: 1588608114}
   m_GaugeSetting: {fileID: 11400000, guid: bea90f8d31580ca47839bdbd6907c785, type: 2}
   m_PlayerSetting: {fileID: 11400000, guid: f5a9e9c9a10f47c4c9712550eed7e4b0, type: 2}
-  m_GameManager: {fileID: 1340963657}
 --- !u!1 &1336461429
 GameObject:
   m_ObjectHideFlags: 0
@@ -6097,7 +6093,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_DistanceUI: {fileID: 180193058}
   m_DistanceSetting: {fileID: 11400000, guid: 59559a2bc7e931349899cb0697b14c01, type: 2}
-  m_GameManager: {fileID: 1340963657}
   m_Volume: {fileID: 1210362307}
 --- !u!1 &2099618954
 GameObject:

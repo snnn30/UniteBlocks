@@ -12,13 +12,13 @@ using UnityEngine.InputSystem;
 
 namespace UniteBlocks
 {
-    public enum Direction
-    {
-        Up, Right, Down, Left,
-    }
-
     public class PlayerController : MonoBehaviour
     {
+        private enum Direction
+        {
+            Up, Right, Down, Left,
+        }
+
         static readonly Dictionary<Direction, Vector2Int> s_DirectionVec = new Dictionary<Direction, Vector2Int>()
         {
             [Direction.Down] = Vector2Int.down,
@@ -115,7 +115,7 @@ namespace UniteBlocks
             DisposeCTS(ref m_DropCTS);
         }
 
-        public async UniTask GroundingProcess()
+        async UniTask GroundingProcess()
         {
             IsAcceptingInput = false;
             foreach (var handle in m_Handles)
@@ -147,7 +147,7 @@ namespace UniteBlocks
             return;
         }
 
-        public bool CanSet(Vector2Int pos, Direction rot)
+        bool CanSet(Vector2Int pos, Direction rot)
         {
             if (!m_BoardController.CanSettle(pos)) { return false; }
             if (m_IsBomb) { return true; }

@@ -1,133 +1,146 @@
 @startuml hoge
 
-namespace Player{
-    class PlayerRotate
-    class PlayerMove
-    class PlayerDrop
-    class PlayerState{
-        +Vector2Int Position
-        +Direction Rotation    
-        +bool IsAcceptingInput
-        +List<Tween> ActiveTweens
-        +Item[] Items
-        +bool IsBomb
-        +void GroundingProcess()
-        +bool CanSet(Vector2Int pos, Directoin rot)
+namespace Utilitiy{
+    class ChainGauge{
+        +float Value
+        +float MaxValue
     }
-    enum Direction
-    class PlayerSetting <<ScriptableObject>>{
-        +float AutoDropDelay
-        +float ManualDropDelay
-        +float StagnationTime
-        +float MoveDelay
-        +float RotateDelay
+    class CircleGauge{
+        +float Value
     }
-
-    PlayerDrop --> PlayerState
-    PlayerRotate --> PlayerState
-    PlayerMove --> PlayerState
-    PlayerRotate ..> Direction
-    PlayerState *- Direction
-    PlayerSetting <- PlayerState
-}
-
-namespace Items{
-    interface Item
-    class Bomb
-    class Puyo{
-        +PuyoType : PuyoType
-    }
-    class PuyoCollerTable <<ScriptableObject>>{
-        +SerializableDictionary<PuyoType, Color> PuyoColooers
-    }
-    enum PuyoType
-
-    Item <|-- Puyo
-    Item <|-- Bomb
-    Puyo --> PuyoCollerTable
-    Puyo --> PuyoType
-    PuyoCollerTable --> PuyoType
-}
-
-namespace Utility{
-    class SerializableDictionary
-    class ChainGauge
-    class CircleGauge
+    class TextBlink
     class UIShake
 }
 
-namespace Manager{
-    class GameManager{
-        +bool IsGaugeIncreasing
-        +void OnGameOver()
+namespace UniteBlocks{
+    namespace Game{
+        class GameManager{
+            {static} +GameManager Instance
+            +bool IsGaugeIncreasing
+            +IObservable<Unit> OnGameOver
+        }
+        class StartUI{
+            +void SetVisilityPressAnyKey(bool visible)
+        }
+        class CountDownUI{
+            +UniTask CountDown()
+        }
+
+        GameManager --> StartUI
+        GameManager --> CountDownUI
     }
+
+    namespace Setting{
+        class BlockColorTable<<ScriptableObject>>{
+            +List<Color> Colors
+        }
+
+        class PlayerSetting<<ScriptableObject>>{
+            +float AutoDropDelay
+            +float ManualDropDelay
+            +float StagnationTime
+            +float MoveDelay
+            +float RotateDelay
+        }
+        class BombGaugeSetting<<ScriptableObject>>{
+            +float IncreasePerSec
+            +float BoostRatio
+        }
+        class PointSetting<<ScriptableObject>>{
+            +int PointPerTile
+        }
+        class DistanceSetting<<ScriptableObject>>{
+            +float DecreasePerSecond
+            +int InitialValue
+            +float TimeToReach
+            +float Acceleration
+            +float ReflexTime
+            +float ReflexTimeScale
+        }
+    }
+
+
+
+
+
+    namespace Score{
+        class ScoreData{
+            +int Value
+            +UniTask SetValue(int targetValue, float seconds, float scale, Ease ease)
+            +SetVisible(bool visible)
+        }
+        class ScoreManager{
+            +UniTask AddScoreAddition(int value)
+            +UniTask AddScoreMultiplication(int value)
+            +void SetVisible(bool visible)
+            +UniTask ResolveAddition()
+            +UniTask ResolveMultiplication()
+        }
+        class DistanceManager{
+            +float Value
+            +void ResetPostProcess()
+        }
+        class DistanceUI{
+            +int Threshold
+            +int Value
+        }    
+        class ResultUI{
+            +int HightScore
+            +int CurrentScore
+            +void SetVisilityPressAnyKey(bool visible)
+        }
+
+        DistanceManager --> DistanceUI
+        ScoreManager ---> ScoreData
+        ScoreManager --> DistanceManager
+        ScoreManager --> ResultUI
+    }
+
+    namespace Items{
+        class Block{
+            +Color Color
+            +Vector2Int Shape
+        }
+        class Bomb
+        interface Item
+
+        Item <|-- Bomb
+        Item <|-- Block
+    }
+
+    namespace Board{
+        class PlayerController
+        class WaitingBomb{
+            +bool IsActive
+            +bool IsBoosting
+            +void UseGauge()
+        }
+        class WaitingItems{
+            +(Item[] items, bool isBomb) GetNextItems()
+        }
+        class BoardController{
+            {static} +Vector2Int START_POS
+            +bool CanSettle(Vector2Int pos, Vector2Int shape)
+            +void Settle(Vector2Int pos, Block block)
+            +UniTask<bool> DropToBottom()
+            +UniTask Explode(Vector2Int pos)
+        }
+
+        PlayerController ---> BoardController
+        PlayerController --> WaitingItems
+        PlayerController --> WaitingBomb
+        WaitingItems --> WaitingBomb
+    }
+
+
+
+    BoardController ---> ScoreManager
+    BoardController ---> Block
+    WaitingItems ---> Item
+    PlayerController --> Item
+    
+
+
 }
-
-
-namespace Board{
-    class WaitingBomb{
-        +bool IsActive
-        +bool IsGaugeIncreasing
-        +bool IsBoosting
-    }
-
-    class WatingItems{
-        +(Item[] items, bool isBomb) GetNextPuyos()
-    }
-
-    class BoardController{
-        {static} +Vector2Int START_POS
-        +bool CanSettle(Vector2Int pos) 
-        +bool Settle(Vector2Int pos, PuyoType puyoType)
-        +bool DropToBottom()
-        +void Explode(Vector2Int pos)
-    }
-    class BombGaugeSetting<<ScriptableObject>>{
-        +flaot IncreasePerSec
-        +float BoostRatio
-    }
-
-    WaitingBomb <- WatingItems
-    WaitingBomb -> BombGaugeSetting
-}
-
-namespace Score{
-    class ScoreData{
-        +uint Value
-        +void SetVisible(bool visible)
-        +Unitask SetValue(uint targetValue, float seconds, float scale)
-    }
-    class ScoreManager{
-        +Unitask AddScoreAddition(value)
-        +Unitask AddScoreMultiplication(value)
-        +void SetVisible(bool visible)
-        +Unitask ResolveAddition()
-        +Unitask ResolveMultiplication()
-    }
-    class DistanceUI{
-        +uint Threshold
-        +uint Value
-    }
-    class DistanceManager{
-        +Value
-    }
-    class DistanceSetting<<ScriptableObject>>
-
-    ScoreManager -> ScoreData
-    ScoreManager -> DistanceManager
-    DistanceManager --> DistanceUI
-    DistanceManager --> DistanceSetting
-}
-
-
-
-
-PlayerState --> Item
-PlayerState --> BoardController
-PlayerState --> WatingItems
-
-WatingItems --> Item
-BoardController --> Puyo
-BoardController -> ScoreManager
 
 @enduml

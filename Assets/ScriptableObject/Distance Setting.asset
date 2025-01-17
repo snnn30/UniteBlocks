@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Distance Setting
   m_EditorClassIdentifier: 
   m_DecreasePerSecond: 100
-  m_InitialValue: 2000
+  m_InitialValue: 9000
   m_TimeToReach: 60
-  m_Acceleration: 3
+  m_Acceleration: 14
   m_ReflexTime: 6
   m_ReflexTimeScale: 0.2
