@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
+using LitMotion;
 using UniRx;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -89,19 +89,13 @@ namespace UniteBlocks
 
             var scoreTween = m_Score.SetValue(targetScore, m_TimeToResolve);
             var scoreAddedTween = m_ScoreAddition.SetValue(0, m_TimeToResolve);
-            var distanceTween = DOTween.To(
-                () => m_DistanceManager.Value,
-                x =>
-                {
-                    m_DistanceManager.Value = x;
-                },
-                m_DistanceManager.Value + m_ScoreAddition.Value,
-                m_TimeToResolve
-                );
+            var distanceHandle = LMotion.Create(m_DistanceManager.Value, m_DistanceManager.Value + m_ScoreAddition.Value, m_TimeToResolve)
+                .Bind(x => m_DistanceManager.Value = x)
+                .AddTo(this);
 
             await scoreAddedTween;
             await scoreTween;
-            await distanceTween;
+            await distanceHandle;
 
             // この方法でゲームオーバーにするとDotweenで警告が出るが問題なく動作する
             // かなりレアなバグらしく原因不明とのこと

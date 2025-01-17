@@ -48,15 +48,23 @@ namespace UniteBlocks
 
             m_IsOperating = true;
 
-            var numTween = LMotion.Create((long)Value, (long)targetValue, seconds)
+            // int型のままだと誤差が出る 補完の過程で積み重なっている？
+            var numHandle = LMotion.Create((long)Value, (long)targetValue, seconds)
                 .WithEase(ease)
-                .Bind(x => Value = (int)x);
+                .Bind(x => Value = (int)x)
+                .AddTo(this);
 
             Vector3 originalScale = m_ValueUI.transform.localScale;
 
-            await LMotion.Create(m_ValueUI.transform.localScale, originalScale * scale, seconds * 0.5f).WithEase(Ease.InOutQuad).BindToLocalScale(m_ValueUI.transform);
-            await LMotion.Create(m_ValueUI.transform.localScale, originalScale, seconds * 0.5f).WithEase(Ease.InOutQuad).BindToLocalScale(m_ValueUI.transform);
-            await numTween;
+            await LMotion.Create(m_ValueUI.transform.localScale, originalScale * scale, seconds * 0.5f).
+                WithEase(Ease.InOutQuad).
+                BindToLocalScale(m_ValueUI.transform)
+                .AddTo(this);
+            await LMotion.Create(m_ValueUI.transform.localScale, originalScale, seconds * 0.5f)
+                .WithEase(Ease.InOutQuad)
+                .BindToLocalScale(m_ValueUI.transform)
+                .AddTo(this);
+            await numHandle;
 
             m_IsOperating = false;
         }

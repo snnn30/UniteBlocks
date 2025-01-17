@@ -4,7 +4,8 @@
 
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
+using LitMotion;
+using LitMotion.Extensions;
 using UnityEngine;
 
 namespace UniteBlocks
@@ -138,7 +139,7 @@ namespace UniteBlocks
         /// <returns>ゲームオーバーしたかどうか</returns>
         public async UniTask<bool> DropToBottom()
         {
-            List<Tween> activeTweens = new List<Tween>();
+            List<MotionHandle> handles = new List<MotionHandle>();
 
             for (int y = 0; y < BOARD_HEIGHT; y++)
             {
@@ -163,17 +164,18 @@ namespace UniteBlocks
 
                     if (targetHeight == y) { continue; }
 
-                    var tween = puyo.transform
-                        .DOLocalMoveY(targetHeight, m_DropTime)
-                        .SetEase(Ease.OutBounce);
-                    activeTweens.Add(tween);
-                    _ = tween.OnKill(() => activeTweens.Remove(tween));
+                    var handle = LMotion.Create(puyo.transform.localPosition.y, targetHeight, m_DropTime)
+                        .WithEase(Ease.OutBounce)
+                        .BindToLocalPositionY(puyo.transform)
+                        .AddTo(this);
+                    handles.Add(handle);
                 }
             }
 
-            while (activeTweens.Count != 0)
+
+            foreach (var handle in handles)
             {
-                await UniTask.Yield();
+                await handle;
             }
 
             await Combine();
@@ -190,7 +192,7 @@ namespace UniteBlocks
 
         async UniTask Combine()
         {
-            List<Tween> tweens = new List<Tween>();
+            List<MotionHandle> handles = new List<MotionHandle>();
 
             for (int x = 0; x < BOARD_WIDTH; x++)
             {
@@ -234,20 +236,16 @@ namespace UniteBlocks
                     center += transform.position;
                     float prex = 0f;
 
-                    var tween = DOTween.To(
-                        () => 0f,
-                        x =>
+                    var handle = LMotion.Create(0f, 360f, m_RotateTime)
+                        .WithEase(Ease.OutBack)
+                        .Bind(x =>
                         {
                             var y = x - prex;
                             puyo.gameObject.transform.RotateAround(center, Vector3.up, y);
                             prex = x;
-                        },
-                        360f,
-                        m_RotateTime
-                        ).SetEase(Ease.OutBack);
-                    tweens.Add(tween);
-                    _ = tween.OnKill(() => tweens.Remove(tween));
-
+                        })
+                        .AddTo(this);
+                    handles.Add(handle);
 
 
                     // その範囲内がぷよで埋まっており、
@@ -288,9 +286,9 @@ namespace UniteBlocks
                 }
             }
 
-            while (tweens.Count != 0)
+            foreach (var handle in handles)
             {
-                await UniTask.Yield();
+                await handle;
             }
         }
 
@@ -349,7 +347,7 @@ namespace UniteBlocks
             }
 
             m_ScoreManager.SetVisible(true);
-            List<Tween> activeTweens = new List<Tween>();
+            List<MotionHandle> handles = new List<MotionHandle>();
             foreach (var list in origins)
             {
                 int points = 0;
@@ -364,17 +362,16 @@ namespace UniteBlocks
                         multiplier += width * height;
                     }
 
-                    var tween = m_Origins[target.x, target.y].transform
-                        .DOScale(0, m_DissolveTime)
-                        .SetEase(Ease.OutExpo);
-                    activeTweens.Add(tween);
-                    _ = tween.OnKill(() =>
-                    {
-                        activeTweens.Remove(tween);
-                        Destroy(m_Origins[target.x, target.y].gameObject);
-                        Delete(target);
-                    });
-
+                    var handle = LMotion.Create(m_Origins[target.x, target.y].transform.localScale, Vector3.zero, m_DissolveTime)
+                        .WithEase(Ease.OutExpo)
+                        .WithOnComplete(() =>
+                        {
+                            Destroy(m_Origins[target.x, target.y].gameObject);
+                            Delete(target);
+                        })
+                        .BindToLocalScale(m_Origins[target.x, target.y].transform)
+                        .AddTo(this);
+                    handles.Add(handle);
                 }
                 await m_ScoreManager.AddScoreAddition(points);
                 await m_ScoreManager.AddScoreMultiplication(multiplier);
@@ -382,9 +379,9 @@ namespace UniteBlocks
 
             await UniTask.WaitForSeconds(0.08f);
 
-            while (activeTweens.Count != 0)
+            foreach (var handle in handles)
             {
-                await UniTask.Yield();
+                await handle;
             }
             await DropToBottom();
 

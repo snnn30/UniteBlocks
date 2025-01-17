@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
+using LitMotion;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -54,7 +54,7 @@ namespace UniteBlocks
         private Direction m_Rotation;
 
         private bool m_IsAcceptingInput = true;
-        private List<Tween> m_ActiveTweens = new List<Tween>();
+        private List<MotionHandle> m_Handles = new List<MotionHandle>();
 
         private float m_DropDelay;
 
@@ -106,9 +106,9 @@ namespace UniteBlocks
         public async UniTask GroundingProcess()
         {
             m_IsAcceptingInput = false;
-            while (m_ActiveTweens.Count != 0)
+            foreach (var handle in m_Handles)
             {
-                await UniTask.Yield();
+                await handle;
             }
 
             if (m_IsBomb)
@@ -191,14 +191,20 @@ namespace UniteBlocks
             if (!m_IsAcceptingInput) { return; }
             if (!CanSet(targetPos, m_Rotation)) { return; }
 
-
             Vector3 vec3 = new Vector3(direction.x, direction.y, 0);
+            Vector3 preX = Vector3.zero;
 
-            Tween tween = this.transform
-                .DOBlendableLocalMoveBy(vec3, m_PlayerSetting.MoveDelay)
-                .SetEase(Ease.OutQuart);
-            m_ActiveTweens.Add(tween);
-            tween.OnKill(() => m_ActiveTweens.Remove(tween));
+            var handle = LMotion.Create(Vector3.zero, vec3, m_PlayerSetting.MoveDelay)
+                .WithEase(Ease.OutQuart)
+                .Bind(x =>
+                {
+                    var moveAmout = x - preX;
+                    this.transform.position += moveAmout;
+                    preX = x;
+                })
+                .AddTo(this);
+
+            m_Handles.Add(handle);
 
             m_Position = targetPos;
             return;
@@ -255,9 +261,9 @@ namespace UniteBlocks
             var parentPuyo = (Block)m_Items[0];
             var childPuyo = (Block)m_Items[1];
 
-            var tween = DOTween.To(
-                () => 0f,
-                x =>
+            var handle = LMotion.Create(0f, targetAmount, m_PlayerSetting.RotateDelay)
+                .WithEase(Ease.OutQuad)
+                .Bind(x =>
                 {
                     var rotateAmount = x - currentAngle;
                     var quaternion = Quaternion.AngleAxis(rotateAmount, Vector3.forward);
@@ -265,13 +271,9 @@ namespace UniteBlocks
                     childPuyo.transform.localPosition = quaternion * childPuyo.transform.localPosition;
                     childPuyo.transform.localPosition += parentPuyo.transform.localPosition;
                     currentAngle = x;
-                },
-                targetAmount,
-                m_PlayerSetting.RotateDelay
-                ).SetEase(Ease.OutQuad);
-
-            m_ActiveTweens.Add(tween);
-            tween.OnKill(() => m_ActiveTweens.Remove(tween));
+                })
+                .AddTo(this);
+            m_Handles.Add(handle);
 
             m_Rotation = targetRot;
             return true;
@@ -312,11 +314,18 @@ namespace UniteBlocks
             }
 
             Vector3 vec3 = Vector3.down;
-            Tween tween = this.transform
-                .DOBlendableLocalMoveBy(vec3, m_DropDelay / 5)
-                .SetEase(Ease.InOutQuad);
-            m_ActiveTweens.Add(tween);
-            _ = tween.OnKill(() => m_ActiveTweens.Remove(tween));
+            Vector3 preX = Vector3.zero;
+
+            var handle = LMotion.Create(Vector3.zero, vec3, m_DropDelay / 5)
+                .WithEase(Ease.InOutQuad)
+                .Bind(x =>
+                {
+                    var dropAmout = x - preX;
+                    this.transform.position += dropAmout;
+                    preX = x;
+                })
+                .AddTo(this);
+            m_Handles.Add(handle);
 
             m_Position = targetPos;
         }

@@ -3,7 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
+using LitMotion;
+using LitMotion.Extensions;
 using TMPro;
 using UnityEngine;
 
@@ -46,19 +47,21 @@ namespace UniteBlocks
             while (Count > 0)
             {
                 var originalScale = m_CountUI.rectTransform.localScale;
-                var scaleTween = m_CountUI.rectTransform.DOScale(originalScale * m_Scale, m_TimePer1Count).SetEase(Ease.OutCubic).SetUpdate(true);
-                var alphaTween = DOTween.To(
-                    () => 1f,
-                    x =>
-                    {
-                        m_CountUI.alpha = x;
-                    },
-                    0f,
-                    m_TimePer1Count
-                    ).SetEase(Ease.InCubic).SetUpdate(true);
 
-                await scaleTween;
-                await alphaTween;
+                var scaleHandle = LMotion.Create(m_CountUI.rectTransform.localScale, originalScale * m_Scale, m_TimePer1Count)
+                    .WithEase(Ease.OutCubic)
+                    .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
+                    .BindToLocalScale(m_CountUI.rectTransform)
+                    .AddTo(this);
+
+                var alphaHandle = LMotion.Create(1f, 0f, m_TimePer1Count)
+                    .WithEase(Ease.InCubic)
+                    .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
+                    .Bind(x => m_CountUI.alpha = x)
+                    .AddTo(this);
+
+                await scaleHandle;
+                await alphaHandle;
 
                 m_CountUI.rectTransform.localScale = originalScale;
                 Count--;

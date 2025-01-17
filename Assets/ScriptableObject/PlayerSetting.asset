@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bdc931fb66dfb1c4297d852fa294cce7, type: 3}
   m_Name: PlayerSetting
   m_EditorClassIdentifier: 
-  _autoDropDelay: 1
-  _manualDropDelay: 0.08
-  _stagnationTime: 0.8
-  _moveDelay: 0.08
-  _rotateDelay: 0.16
+  m_AutoDropDelay: 1
+  m_ManualDropDelay: 0.08
+  m_StagnationTime: 0.8
+  m_MoveDelay: 0.08
+  m_RotateDelay: 0.16

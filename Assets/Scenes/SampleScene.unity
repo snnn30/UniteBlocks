@@ -490,7 +490,7 @@ MonoBehaviour:
   m_Input: {fileID: 892744479}
   m_Volume: {fileID: 1210362307}
   m_ScaleAtAddition: 1.2
-  m_TimeToResolve: 1.4
+  m_TimeToResolve: 1.6
   m_TimeToAdd: 0.4
 --- !u!1 &177994852
 GameObject:

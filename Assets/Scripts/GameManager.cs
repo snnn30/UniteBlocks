@@ -4,7 +4,6 @@
 
 using System;
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
 using UniRx;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -68,7 +67,6 @@ namespace UniteBlocks
 
         public void GameOver()
         {
-            DOTween.Clear(true);
             Time.timeScale = 0;
             m_Subject.OnNext(Unit.Default);
 
@@ -77,7 +75,6 @@ namespace UniteBlocks
 
         public void Restart()
         {
-            DOTween.Clear(true);
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
 
