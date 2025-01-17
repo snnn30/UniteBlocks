@@ -62,11 +62,7 @@ namespace UniteBlocks
             m_StartUI.gameObject.SetActive(false);
 
             m_CountDownUI.gameObject.SetActive(true);
-
-            var token = gameObject.GetCancellationTokenOnDestroy();
             await m_CountDownUI.CountDown();
-            if (token.IsCancellationRequested) { return; }
-
             m_CountDownUI.gameObject.SetActive(false);
 
             Time.timeScale = 1;
@@ -104,7 +100,6 @@ namespace UniteBlocks
                 m_Input.actions["Pause"].performed -= OnPause;
                 await m_CountDownUI.CountDown();
                 m_Input.actions["Pause"].performed += OnPause;
-
                 m_CountDownUI.gameObject.SetActive(false);
 
                 Time.timeScale = m_TimeScale;
