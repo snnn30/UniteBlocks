@@ -16,7 +16,6 @@ namespace UniteBlocks
 
         private const int BOARD_WIDTH = 6;
         private const int BOARD_HEIGHT = 14;
-        private const int POINT = 100;
 
         private Vector2Int?[,] m_Coord = new Vector2Int?[BOARD_WIDTH, BOARD_HEIGHT];
         private Block[,] m_Origins = new Block[BOARD_WIDTH, BOARD_HEIGHT];
@@ -29,6 +28,9 @@ namespace UniteBlocks
 
         [SerializeField]
         private ScoreManager m_ScoreManager;
+
+        [SerializeField]
+        private PointSetting m_PointSetting;
 
         [SerializeField]
         private float m_DropTime = 0.5f;
@@ -66,11 +68,11 @@ namespace UniteBlocks
         /// <summary>
         /// アイテムがおけるかを検証
         /// </summary>
-        public bool CanSettle(Vector2Int pos, Block puyo)
+        public bool CanSettle(Vector2Int pos, Block block)
         {
-            for (int x = pos.x; x < pos.x + puyo.Shape.x; x++)
+            for (int x = pos.x; x < pos.x + block.Shape.x; x++)
             {
-                for (int y = pos.y; y < pos.y + puyo.Shape.y; y++)
+                for (int y = pos.y; y < pos.y + block.Shape.y; y++)
                 {
                     var target = new Vector2Int(x, y);
                     if (!IsValid(target)) { return false; }
@@ -89,20 +91,20 @@ namespace UniteBlocks
         /// <summary>
         /// アイテムを置く
         /// </summary>
-        public void Settle(Vector2Int pos, Block puyo)
+        public void Settle(Vector2Int pos, Block block)
         {
-            if (!CanSettle(pos, puyo))
+            if (!CanSettle(pos, block))
             {
                 Debug.LogError("セット先が無効");
                 return;
             }
 
-            puyo.transform.parent = m_BlocksContainer.transform;
-            m_Origins[pos.x, pos.y] = puyo;
+            block.transform.parent = m_BlocksContainer.transform;
+            m_Origins[pos.x, pos.y] = block;
 
-            for (int x = pos.x; x < pos.x + puyo.Shape.x; x++)
+            for (int x = pos.x; x < pos.x + block.Shape.x; x++)
             {
-                for (int y = pos.y; y < pos.y + puyo.Shape.y; y++)
+                for (int y = pos.y; y < pos.y + block.Shape.y; y++)
                 {
                     m_Coord[x, y] = pos;
                 }
@@ -120,11 +122,11 @@ namespace UniteBlocks
                 return;
             }
 
-            var puyo = m_Origins[pos.x, pos.y];
+            var block = m_Origins[pos.x, pos.y];
 
-            for (int x = pos.x; x < pos.x + puyo.Shape.x; x++)
+            for (int x = pos.x; x < pos.x + block.Shape.x; x++)
             {
-                for (int y = pos.y; y < pos.y + puyo.Shape.y; y++)
+                for (int y = pos.y; y < pos.y + block.Shape.y; y++)
                 {
                     m_Coord[x, y] = null;
                 }
@@ -147,7 +149,7 @@ namespace UniteBlocks
                 {
                     if (m_Origins[x, y] == null) { continue; }
 
-                    var puyo = m_Origins[x, y];
+                    var block = m_Origins[x, y];
                     int targetHeight = y;
 
                     // 先に自身を消す事で自身に干渉しないようにする
@@ -156,17 +158,17 @@ namespace UniteBlocks
                     // 下の行を検査
                     for (int j = y - 1; j >= 0; j--)
                     {
-                        if (!CanSettle(new Vector2Int(x, j), puyo)) { break; }
+                        if (!CanSettle(new Vector2Int(x, j), block)) { break; }
                         targetHeight--;
                     }
 
-                    Settle(new Vector2Int(x, targetHeight), puyo);
+                    Settle(new Vector2Int(x, targetHeight), block);
 
                     if (targetHeight == y) { continue; }
 
-                    var handle = LMotion.Create(puyo.transform.localPosition.y, targetHeight, m_DropTime)
+                    var handle = LMotion.Create(block.transform.localPosition.y, targetHeight, m_DropTime)
                         .WithEase(Ease.OutBounce)
-                        .BindToLocalPositionY(puyo.transform)
+                        .BindToLocalPositionY(block.transform)
                         .AddTo(this);
                     handles.Add(handle);
                 }
@@ -199,31 +201,31 @@ namespace UniteBlocks
                 for (int y = 0; y < BOARD_HEIGHT; y++)
                 {
                     if (m_Origins[x, y] == null) { continue; }
-                    var puyo = m_Origins[x, y];
+                    var block = m_Origins[x, y];
 
-                    Vector2Int targetShape = puyo.Shape;
-                    List<Vector2Int> deletePuyos = new List<Vector2Int>();
+                    Vector2Int targetShape = block.Shape;
+                    List<Vector2Int> deleteBlocks = new List<Vector2Int>();
 
                     // x,yを左下、i,jを右上の座標としたときの長方形を考える
-                    for (int i = x + puyo.Shape.x - 1; i < BOARD_WIDTH; i++)
+                    for (int i = x + block.Shape.x - 1; i < BOARD_WIDTH; i++)
                     {
-                        for (int j = y + puyo.Shape.y - 1; j < BOARD_HEIGHT; j++)
+                        for (int j = y + block.Shape.y - 1; j < BOARD_HEIGHT; j++)
                         {
-                            if (!CheckInRange(x, y, i, j, ref deletePuyos)) { continue; }
+                            if (!CheckInRange(x, y, i, j, ref deleteBlocks)) { continue; }
                             targetShape = new Vector2Int(i - x + 1, j - y + 1);
                         }
                     }
 
                     if (targetShape.x < 2 || targetShape.y < 2) { continue; }
-                    if (targetShape == puyo.Shape) { continue; }
+                    if (targetShape == block.Shape) { continue; }
 
-                    foreach (var pos in deletePuyos)
+                    foreach (var pos in deleteBlocks)
                     {
                         Destroy(m_Origins[pos.x, pos.y].gameObject);
                         Delete(pos);
                     }
 
-                    puyo.Shape = targetShape;
+                    block.Shape = targetShape;
                     for (int i = x; i < x + targetShape.x; i++)
                     {
                         for (int j = y; j < y + targetShape.y; j++)
@@ -232,7 +234,7 @@ namespace UniteBlocks
                         }
                     }
 
-                    Vector3 center = new Vector3(x + (float)puyo.Shape.x / 2, y + (float)puyo.Shape.y / 2, 0);
+                    Vector3 center = new Vector3(x + (float)block.Shape.x / 2f, y + (float)block.Shape.y / 2f, 0);
                     center += transform.position;
                     float prex = 0f;
 
@@ -241,7 +243,7 @@ namespace UniteBlocks
                         .Bind(x =>
                         {
                             var y = x - prex;
-                            puyo.gameObject.transform.RotateAround(center, Vector3.up, y);
+                            block.gameObject.transform.RotateAround(center, Vector3.up, y);
                             prex = x;
                         })
                         .AddTo(this);
@@ -252,7 +254,7 @@ namespace UniteBlocks
                     // その範囲内のぷよが全部x0,y0のぷよと同じタイプであり、
                     // その範囲からはみ出ていなければtrue
                     // 高さか幅が1ならパス　通すとdeletePuyosが変化してしまう
-                    bool CheckInRange(int x0, int y0, int x1, int y1, ref List<Vector2Int> deletePuyos)
+                    bool CheckInRange(int x0, int y0, int x1, int y1, ref List<Vector2Int> deleteBlocks)
                     {
                         if (x0 == x1 || y0 == y1) { return false; }
                         Color type = m_Origins[x0, y0].Color;
@@ -278,7 +280,7 @@ namespace UniteBlocks
                         }
 
                         origins.Remove(new Vector2Int(x0, y0));
-                        deletePuyos = origins;
+                        deleteBlocks = origins;
                         return true;
                     }
 
@@ -317,7 +319,7 @@ namespace UniteBlocks
                 }
                 void GetNextExplosionTargets(Vector2Int origin)
                 {
-                    List<Vector2Int> inspectionPositions = GetTouchingPuyo(origin);
+                    List<Vector2Int> inspectionPositions = GetTouchingBlocks(origin);
 
                     foreach (var target in inspectionPositions)
                     {
@@ -356,7 +358,7 @@ namespace UniteBlocks
                 {
                     var width = m_Origins[target.x, target.y].Shape.x;
                     var height = m_Origins[target.x, target.y].Shape.y;
-                    points += POINT * width * height;
+                    points += m_PointSetting.PointPerTile * width * height;
                     if (width != 1 || height != 1)
                     {
                         multiplier += width * height;
@@ -392,21 +394,21 @@ namespace UniteBlocks
         }
 
         // 斜めは含まない
-        List<Vector2Int> GetTouchingPuyo(Vector2Int origin)
+        List<Vector2Int> GetTouchingBlocks(Vector2Int origin)
         {
             List<Vector2Int> outList = new List<Vector2Int>();
-            Block puyo = m_Origins[origin.x, origin.y];
+            Block block = m_Origins[origin.x, origin.y];
 
-            for (int i = origin.x - 1; i < origin.x + puyo.Shape.x + 1; i++)
+            for (int i = origin.x - 1; i < origin.x + block.Shape.x + 1; i++)
             {
-                for (int j = origin.y - 1; j < origin.y + puyo.Shape.y + 1; j++)
+                for (int j = origin.y - 1; j < origin.y + block.Shape.y + 1; j++)
                 {
                     if (!IsValid(new Vector2Int(i, j))) { continue; }
                     if (m_Coord[i, j] == null) { continue; }
                     if (i == origin.x - 1 && j == origin.y - 1 ||
-                        i == origin.x - 1 && j == origin.y + puyo.Shape.y ||
-                        i == origin.x + puyo.Shape.x && j == origin.y - 1 ||
-                        i == origin.x + puyo.Shape.x && j == origin.y + puyo.Shape.y) { continue; }
+                        i == origin.x - 1 && j == origin.y + block.Shape.y ||
+                        i == origin.x + block.Shape.x && j == origin.y - 1 ||
+                        i == origin.x + block.Shape.x && j == origin.y + block.Shape.y) { continue; }
                     if (outList.Contains((Vector2Int)m_Coord[i, j])) { continue; }
                     outList.Add((Vector2Int)m_Coord[i, j]);
                 }

@@ -3950,6 +3950,7 @@ MonoBehaviour:
   m_BlocksContainer: {fileID: 21047126}
   m_GameManager: {fileID: 1340963657}
   m_ScoreManager: {fileID: 159018429}
+  m_PointSetting: {fileID: 11400000, guid: 227d4312b86b09641a6d347d2d58ed3a, type: 2}
   m_DropTime: 0.5
   m_RotateTime: 1.2
   m_DissolveTime: 0.28
