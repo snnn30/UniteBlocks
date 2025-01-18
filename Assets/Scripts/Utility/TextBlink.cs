@@ -29,5 +29,6 @@ namespace Utility
             val = Mathf.Lerp(0f, Mathf.PI * 2f, val);
             m_Text.alpha = (1f + Mathf.Sin(val)) / 2f;
         }
+
     }
 }

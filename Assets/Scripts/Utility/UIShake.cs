@@ -29,5 +29,6 @@ namespace Utility
             float shakeY = Mathf.PerlinNoise(0, Time.time * m_ShakeSpeed) * m_ShakeAmount;
             m_RectTransform.localPosition = m_OriginalPosition + new Vector3(shakeX, shakeY, 0);
         }
+
     }
 }
